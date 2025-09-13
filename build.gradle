@@ -35,25 +35,25 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-configuration-processor'
-    implementation 'org.springframework.security.oauth:spring-security-oauth2:2.3.3.RELEASE'
+    implementation 'org.springframework.security.oauth:spring-security-oauth2:2.3.5.RELEASE'
     implementation group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.1.1.RELEASE'
 
     compile('org.springframework.data:spring-data-elasticsearch') {
         exclude module: 'log4j-api'
     }
-    implementation 'com.google.guava:guava:23.5-jre'
-    implementation 'org.apache.commons:commons-lang3:3.7'
+    implementation 'com.google.guava:guava:32.0.0-android'
+    implementation 'org.apache.commons:commons-lang3:3.18.0'
     implementation 'org.codehaus.janino:janino:3.0.8'
 
     implementation 'io.springfox:springfox-swagger2:3.0.0'
     implementation 'io.springfox:springfox-swagger-ui:3.0.0'
 
-    implementation 'commons-io:commons-io:2.6'
+    implementation 'commons-io:commons-io:2.14.0'
     implementation 'com.microsoft.azure:azure-storage:8.0.0'
     implementation 'com.microsoft.azure:azure-storage-spring-boot-starter:2.0.2'
 
-    implementation 'org.apache.tika:tika-core:1.18'
-    implementation 'org.apache.tika:tika-parsers:1.18'
+    implementation 'org.apache.tika:tika-core:1.28.3'
+    implementation 'org.apache.tika:tika-parsers:1.20'
 
     implementation group: 'com.microsoft.azure', name: 'applicationinsights-web-auto', version: '2.5.0'
     implementation group: 'com.microsoft.azure', name: 'applicationinsights-logging-logback', version: '2.5.0'
@@ -61,7 +61,7 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    testImplementation 'com.google.code.gson:gson:2.8.2'
+    testImplementation 'com.google.code.gson:gson:2.8.9'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.4'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
@@ -74,6 +74,47 @@ dependencies {
 
     testImplementation "org.testcontainers:elasticsearch:1.19.8"
 
+    // Version constraints for transitive dependencies
+    constraints {
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
+        implementation 'org.apache.tomcat.embed:tomcat-embed-core:9.0.108'
+        implementation 'org.quartz-scheduler:quartz:2.3.2'
+        implementation 'org.yaml:snakeyaml:2.0'
+        implementation 'org.apache.cxf:cxf-core:3.5.11'
+        implementation 'org.springframework.boot:spring-boot-actuator-autoconfigure:2.5.15'
+        implementation 'org.apache.xmlbeans:xmlbeans:3.0.0'
+        implementation 'org.springframework:spring-webmvc:5.3.44'
+        implementation 'org.apache.cxf:cxf-rt-transports-http:3.1.16'
+        implementation 'org.apache.uima:uimaj-core:3.3.1'
+        implementation 'org.json:json:20231013'
+        implementation 'ch.qos.logback:logback-core:1.3.15'
+        implementation 'ch.qos.logback:logback-classic:1.3.15'
+        implementation 'com.fasterxml.jackson.core:jackson-core:2.15.0'
+        implementation 'com.github.junrar:junrar:7.4.1'
+        implementation 'com.google.protobuf:protobuf-java:3.25.5'
+        implementation 'org.apache.commons:commons-compress:1.26.0'
+        implementation 'org.jsoup:jsoup:1.15.3'
+        implementation 'org.bouncycastle:bcprov-jdk15on:1.78'
+        implementation 'org.springframework.boot:spring-boot:3.3.11'
+        implementation 'io.github.classgraph:classgraph:4.8.112'
+        implementation 'org.apache.pdfbox:pdfbox:2.0.24'
+        implementation 'org.apache.uima:uimafit-core:2.4.0'
+        implementation 'org.springframework.boot:spring-boot-actuator:2.7.18'
+        implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:9.0.86'
+        implementation 'org.springframework.security:spring-security-config:5.7.14'
+        implementation 'org.springframework.security:spring-security-web:5.7.14'
+        implementation 'com.drewnoakes:metadata-extractor:2.18.0'
+        implementation 'org.apache.poi:poi:4.1.1'
+        implementation 'org.apache.poi:poi-scratchpad:5.2.1'
+        implementation 'org.glassfish.jersey.core:jersey-common:2.34'
+        implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+        implementation 'org.apache.james:apache-mime4j-core:0.8.10'
+        implementation 'org.apache.poi:poi-ooxml:5.4.0'
+        implementation 'org.bouncycastle:bcpkix-jdk15on:1.79'
+        implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.6.0'
+        implementation 'org.springframework.boot:spring-boot-autoconfigure:2.5.15'
+        implementation 'org.springframework:spring-core:5.3.41'
+    }
 
 }
 
