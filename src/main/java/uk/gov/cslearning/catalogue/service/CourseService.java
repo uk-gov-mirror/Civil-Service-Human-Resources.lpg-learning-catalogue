@@ -11,11 +11,13 @@ import uk.gov.cslearning.catalogue.domain.CivilServant.CivilServant;
 import uk.gov.cslearning.catalogue.domain.CivilServant.OrganisationalUnit;
 import uk.gov.cslearning.catalogue.domain.Course;
 import uk.gov.cslearning.catalogue.domain.Owner.OwnerFactory;
+import uk.gov.cslearning.catalogue.domain.Status;
 import uk.gov.cslearning.catalogue.domain.module.Audience;
 import uk.gov.cslearning.catalogue.domain.module.Event;
 import uk.gov.cslearning.catalogue.domain.module.FaceToFaceModule;
 import uk.gov.cslearning.catalogue.domain.module.Module;
 import uk.gov.cslearning.catalogue.domain.validation.CourseValidator;
+import uk.gov.cslearning.catalogue.exception.CourseCannotByDeletedException;
 import uk.gov.cslearning.catalogue.repository.CourseRepository;
 import uk.gov.cslearning.catalogue.repository.CourseRequiredRepository;
 
@@ -74,6 +76,10 @@ public class CourseService {
         course.setOwner(ownerFactory.create(civilServant, course));
         course.setCreatedTimestamp(LocalDateTime.now(Clock.systemUTC()));
 
+        if(course.getHasBeenPublished() == null){
+            course.setHasBeenPublished(course.getStatus().equals(Status.PUBLISHED));
+        }
+
         courseRepository.save(course);
 
         return course;
@@ -85,7 +91,7 @@ public class CourseService {
     }
 
     public Course updateCourse(Course course, Course newCourse) {
-        courseValidator.validate(course, newCourse);
+         courseValidator.validate(course, newCourse);
         course.setTitle(newCourse.getTitle());
         course.setShortDescription(newCourse.getShortDescription());
         course.setLearningOutcomes(newCourse.getLearningOutcomes());
@@ -96,6 +102,16 @@ public class CourseService {
         course.setTopicId(newCourse.getTopicId());
         course.setUpdatedTimestamp(LocalDateTime.now(Clock.systemUTC()));
         Optional.ofNullable(newCourse.getLearningProvider()).ifPresent(course::setLearningProvider);
+
+        if(newCourse.getHasBeenPublished() == null){
+            if(newCourse.getStatus().equals(Status.PUBLISHED)){
+                course.setHasBeenPublished(true);
+            }
+        }
+        else{
+            course.setHasBeenPublished(newCourse.getHasBeenPublished());
+        }
+
         courseRepository.save(course);
         return course;
     }
@@ -235,6 +251,20 @@ public class CourseService {
 
     public Page<Course> getRequiredCourses(String profession, String gradeCode, List<String>departments, List<String>otherAreasOfWork,  List<String>interests, String courseStatus,  Pageable pageable) {
         return courseRequiredRepository.findRequired(profession, gradeCode, departments, otherAreasOfWork, interests, courseStatus, pageable);
+    }
+
+    public Course deleteCourseById(String courseId){
+        Course course = getCourseById(courseId);
+        Boolean courseCanBeDeleted = course.getHasBeenPublished() != null && !course.getHasBeenPublished();
+
+        if(courseCanBeDeleted){
+            courseRepository.delete(course);
+            return course;
+        }
+        else{
+            throw new CourseCannotByDeletedException();
+        }
+
     }
 
     private void addToGroupedCourses(Course course, Map<String, List<Course>> groupedCourses, Audience audience) {

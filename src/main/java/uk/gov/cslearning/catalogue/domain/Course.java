@@ -72,6 +72,8 @@ public class Course {
 
     private BigDecimal cost = new BigDecimal(0);
 
+    private Boolean hasBeenPublished;
+
     public Course() {
     }
 

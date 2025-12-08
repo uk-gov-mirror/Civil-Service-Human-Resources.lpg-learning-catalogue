@@ -24,6 +24,7 @@ import uk.gov.cslearning.catalogue.domain.module.Audience;
 import uk.gov.cslearning.catalogue.domain.module.Event;
 import uk.gov.cslearning.catalogue.domain.module.FaceToFaceModule;
 import uk.gov.cslearning.catalogue.domain.module.Module;
+import uk.gov.cslearning.catalogue.exception.CourseCannotByDeletedException;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
 import uk.gov.cslearning.catalogue.mapping.DaysMapper;
 import uk.gov.cslearning.catalogue.repository.CourseRepository;
@@ -363,6 +364,23 @@ public class CourseController {
         courseService.updateCourse(courseId, newCourse);
         return ResponseEntity.ok(null);
     }
+
+    @DeleteMapping(path = "/{courseId}")
+    @PreAuthorize("(hasAnyAuthority(T(uk.gov.cslearning.catalogue.domain.Roles).LEARNING_DELETE, T(uk.gov.cslearning.catalogue.domain.Roles).LEARNING_MANAGER, T(uk.gov.cslearning.catalogue.domain.Roles).CSL_AUTHOR))")
+    public ResponseEntity<Void> delete(@PathVariable("courseId") String courseId){
+        try{
+            LOGGER.info("Deleting course with ID {} ", courseId);
+            courseService.deleteCourseById(courseId);
+            LOGGER.info("Course with ID {} deleted successfully.", courseId);
+            return ResponseEntity.ok(null);
+        }
+        catch (CourseCannotByDeletedException e){
+            LOGGER.error("Exception thrown while trying to delete course with ID {}: {}", courseId, e.getMessage());
+            return ResponseEntity.status(CONFLICT).build();
+        }
+
+    }
+
 
     @PostMapping("/{courseId}/modules")
     @PreAuthorize("(hasPermission(#courseId, 'write') and hasAnyAuthority(T(uk.gov.cslearning.catalogue.domain.Roles).LEARNING_CREATE, T(uk.gov.cslearning.catalogue.domain.Roles).LEARNING_MANAGER, T(uk.gov.cslearning.catalogue.domain.Roles).CSL_AUTHOR))")

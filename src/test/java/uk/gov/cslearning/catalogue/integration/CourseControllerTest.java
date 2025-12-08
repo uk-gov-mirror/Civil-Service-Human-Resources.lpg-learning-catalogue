@@ -184,4 +184,124 @@ public class CourseControllerTest extends IntegrationTestBase {
         assertEquals("FIRST", result.getModules().get(1).getId());
     }
 
+    @Test
+    @Order(7)
+    @WithMockUser(value = "spring", authorities = {"CSL_AUTHOR"})
+    public void testUpdatingCourseToStatusPublishedSetsHasBeenPublishedToTrue() throws Exception {
+        String courseId = "test-course-01";
+
+        Course course = new Course();
+        course.setId(courseId);
+        course.setTitle("My course");
+        course.setStatus(Status.DRAFT);
+        course.setHasBeenPublished(false);
+
+        dataService.getRepository().save(course);
+
+        String json = new JSONObject()
+                .put("id", courseId)
+                .put("title", "My course")
+                .put("status", "Published")
+                .toString();
+
+        mvc.perform(put(String.format("/courses/%s", course.getId()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk());
+
+
+        mvc.perform(get(String.format("/courses/%s", course.getId()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("Published"))
+                .andExpect(jsonPath("$.hasBeenPublished").value(true));
+    }
+
+    @Test
+    @Order(8)
+    @WithMockUser(value = "spring", authorities = {"CSL_AUTHOR"})
+    public void testUpdatingCourseToStatusDraftDoesNotChangeHasBeenPublishedValueFromTrue() throws Exception {
+        String courseId = "test-course-02";
+
+        Course course = new Course();
+        course.setId(courseId);
+        course.setTitle("My course 02");
+        course.setStatus(Status.PUBLISHED);
+        course.setHasBeenPublished(true);
+
+        dataService.getRepository().save(course);
+
+        String json = new JSONObject()
+                .put("id", courseId)
+                .put("title", "My course")
+                .put("status", "Draft")
+                .toString();
+
+        mvc.perform(put(String.format("/courses/%s", course.getId()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk());
+
+
+        mvc.perform(get(String.format("/courses/%s", course.getId()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("Draft"))
+                .andExpect(jsonPath("$.hasBeenPublished").value(true));
+    }
+
+    @Test
+    @Order(9)
+    @WithMockUser(value = "spring", authorities = {"CSL_AUTHOR"})
+    public void testDeletingCourseRemovesDocumentIfCourseIsDraftAndNotPublished() throws Exception {
+        Course course = new Course();
+        course.setTitle("My course 03");
+        course.setStatus(Status.DRAFT);
+        course.setHasBeenPublished(false);
+
+        dataService.getRepository().save(course);
+
+        mvc.perform(delete(String.format("/courses/%s", course.getId()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+
+        mvc.perform(get(String.format("/courses/%s", course.getId()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Order(10)
+    @WithMockUser(value = "spring", authorities = {"CSL_AUTHOR"})
+    public void testDeletingCourseDoesNotRemovesDocumentIfCourseIsDraftAndPublishedAndThrowsConflictError() throws Exception {
+        String courseId = "test-course-04";
+
+        Course course = new Course();
+        course.setId(courseId);
+        course.setTitle("My course 04");
+        course.setStatus(Status.DRAFT);
+        course.setHasBeenPublished(true);
+
+        dataService.getRepository().save(course);
+
+        mvc.perform(delete(String.format("/courses/%s", course.getId()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+
+
+        mvc.perform(get(String.format("/courses/%s", course.getId()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
 }

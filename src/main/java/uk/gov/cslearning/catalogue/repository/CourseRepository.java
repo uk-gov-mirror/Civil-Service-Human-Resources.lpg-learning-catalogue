@@ -92,4 +92,5 @@ public interface CourseRepository extends ElasticsearchRepository<Course, String
 
     Page<Course> findAllBySupplier(String supplier, Pageable pageable);
 
+    void deleteCourseById(String id);
 }
