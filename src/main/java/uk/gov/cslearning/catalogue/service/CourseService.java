@@ -4,8 +4,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import uk.gov.cslearning.catalogue.api.SearchResults;
+import uk.gov.cslearning.catalogue.api.v2.model.CourseSearchParameters;
 import uk.gov.cslearning.catalogue.api.v2.model.RequiredLearningIdMap;
 import uk.gov.cslearning.catalogue.domain.CivilServant.CivilServant;
 import uk.gov.cslearning.catalogue.domain.CivilServant.OrganisationalUnit;
@@ -315,5 +318,9 @@ public class CourseService {
         });
 
         return course;
+    }
+
+    public SearchResults search(CourseSearchParameters params, Pageable pageable) {
+        return courseRepository.search(pageable, params);
     }
 }

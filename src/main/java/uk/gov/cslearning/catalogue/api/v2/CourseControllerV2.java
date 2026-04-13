@@ -4,11 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.cslearning.catalogue.api.PageResults;
+import uk.gov.cslearning.catalogue.api.SearchResults;
+import uk.gov.cslearning.catalogue.api.v2.model.CourseSearchParameters;
 import uk.gov.cslearning.catalogue.api.v2.model.GetCoursesParameters;
 import uk.gov.cslearning.catalogue.api.v2.model.RequiredLearningIdMap;
 import uk.gov.cslearning.catalogue.domain.Course;
@@ -22,7 +21,6 @@ public class CourseControllerV2 {
     private final CourseRepository courseRepository;
     private final CourseService courseService;
 
-    @Autowired
     public CourseControllerV2(CourseRepository courseRepository, CourseService courseService) {
         this.courseRepository = courseRepository;
         this.courseService = courseService;
@@ -38,5 +36,11 @@ public class CourseControllerV2 {
     @ResponseBody
     public RequiredLearningIdMap getRequiredLearningForDepartments() {
         return courseService.getDepartmentCodeToCourseIdRequiredLearningMap();
+    }
+
+    @PostMapping("/search")
+    @ResponseBody
+    public SearchResults searchCourses(@RequestBody CourseSearchParameters params, Pageable pageable) {
+        return courseService.search(params, pageable);
     }
 }

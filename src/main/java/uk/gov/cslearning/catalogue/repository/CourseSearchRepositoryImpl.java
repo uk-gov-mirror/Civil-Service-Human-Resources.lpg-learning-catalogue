@@ -85,6 +85,10 @@ public class CourseSearchRepositoryImpl implements CourseSearchRepository {
         List<String> statusList = parameters.getStatus().stream().map(Status::getValue).collect(Collectors.toList());
         searchQuery = addFilter(searchQuery, statusList, "status");
 
+        if (!parameters.getCourseIds().isEmpty()) {
+            searchQuery.filter(idsQuery().addIds(parameters.getCourseIds().toArray(new String[]{})));
+        }
+
         return searchQuery;
     }
 
