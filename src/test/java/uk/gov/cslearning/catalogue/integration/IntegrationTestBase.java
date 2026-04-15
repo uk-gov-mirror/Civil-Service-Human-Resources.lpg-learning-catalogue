@@ -50,11 +50,8 @@ public abstract class IntegrationTestBase {
     @Autowired
     protected WebApplicationContext context;
 
-//    static boolean runIntegrationTests = Boolean.parseBoolean(System.getenv("RUN_INTEGRATION_TESTS"));
-//    static boolean useLocalElastic = Boolean.parseBoolean(System.getenv("INTEGRATION_TEST_USE_LOCAL_ELASTIC"));
-
-    static boolean runIntegrationTests = true;
-    static boolean useLocalElastic = true;
+    static boolean runIntegrationTests = Boolean.parseBoolean(System.getenv("RUN_INTEGRATION_TESTS"));
+    static boolean useLocalElastic = Boolean.parseBoolean(System.getenv("INTEGRATION_TEST_USE_LOCAL_ELASTIC"));
 
     @BeforeClass
     public static void beforeClass() {
