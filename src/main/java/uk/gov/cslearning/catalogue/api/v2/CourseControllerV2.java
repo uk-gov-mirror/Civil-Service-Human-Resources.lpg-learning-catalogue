@@ -1,8 +1,9 @@
 package uk.gov.cslearning.catalogue.api.v2;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.cslearning.catalogue.api.PageResults;
@@ -40,7 +41,8 @@ public class CourseControllerV2 {
 
     @PostMapping("/search")
     @ResponseBody
-    public SearchResults searchCourses(@RequestBody CourseSearchParameters params, Pageable pageable) {
+    public SearchResults searchCourses(@RequestBody CourseSearchParameters params,
+                                       @PageableDefault(sort = {"title"}, direction = Sort.Direction.ASC) Pageable pageable) {
         return courseService.search(params, pageable);
     }
 }
