@@ -42,7 +42,7 @@ public class CourseControllerV2 {
     @PostMapping("/search")
     @ResponseBody
     public SearchResults searchCourses(@RequestBody CourseSearchParameters params,
-                                       @PageableDefault(sort = {"title"}, direction = Sort.Direction.ASC) Pageable pageable) {
+                                       @PageableDefault(sort = {"title.keyword"}, direction = Sort.Direction.ASC) Pageable pageable) {
         return courseService.search(params, pageable);
     }
 }

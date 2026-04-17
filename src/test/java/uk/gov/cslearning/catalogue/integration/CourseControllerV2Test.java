@@ -22,14 +22,16 @@ public class CourseControllerV2Test extends IntegrationTestBase {
 
     @Test
     public void testCourseSearchPost() throws Exception {
-        mvc.perform(post("/v2/courses/search?size=1&page=0")
+        mvc.perform(post("/v2/courses/search?size=2&page=0")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"courseIds\": [\"req-course-1\", \"req-course-2\"], \"query\":  \"2\"}")
+                        .content("{\"courseIds\": [\"req-course-1\", \"req-course-2\", \"elearning-course\"], \"query\":  \"Required\"}")
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.results.length()").value(1))
-                .andExpect(jsonPath("$.results[0].id").value("req-course-2"))
-                .andExpect(jsonPath("$.results[0].title").value("Required course 2"));
+                .andExpect(jsonPath("$.results.length()").value(2))
+                .andExpect(jsonPath("$.results[0].id").value("req-course-1"))
+                .andExpect(jsonPath("$.results[0].title").value("Required course 1"))
+                .andExpect(jsonPath("$.results[1].id").value("req-course-2"))
+                .andExpect(jsonPath("$.results[1].title").value("Required course 2"));
     }
 
 }
