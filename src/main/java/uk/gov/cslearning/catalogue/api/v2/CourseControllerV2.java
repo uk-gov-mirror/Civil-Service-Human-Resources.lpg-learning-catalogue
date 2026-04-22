@@ -1,9 +1,9 @@
 package uk.gov.cslearning.catalogue.api.v2;
 
+import org.elasticsearch.common.collect.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.cslearning.catalogue.api.PageResults;
@@ -15,9 +15,16 @@ import uk.gov.cslearning.catalogue.domain.Course;
 import uk.gov.cslearning.catalogue.repository.CourseRepository;
 import uk.gov.cslearning.catalogue.service.CourseService;
 
+import javax.validation.ConstraintViolationException;
+import java.util.Arrays;
+
 @RestController
 @RequestMapping("/v2/courses")
 public class CourseControllerV2 {
+
+    private String[] SORTABLE_FIELDS = {
+            "title"
+    };
 
     private final CourseRepository courseRepository;
     private final CourseService courseService;
@@ -42,7 +49,12 @@ public class CourseControllerV2 {
     @PostMapping("/search")
     @ResponseBody
     public SearchResults searchCourses(@RequestBody CourseSearchParameters params,
-                                       @PageableDefault(sort = {"title.keyword"}, direction = Sort.Direction.ASC) Pageable pageable) {
-        return courseService.search(params, pageable);
+                                       @RequestParam(value = "sort.field", required = false) String field,
+                                       @RequestParam(value = "sort.direction", required = false) Sort.Direction direction,
+                                       Pageable pageable) {
+        if (field != null && !Arrays.asList(SORTABLE_FIELDS).contains(field)) {
+            throw new ConstraintViolationException(String.format("'%s' is not a valid sortable field, valid fields are: %s", field, Arrays.toString(SORTABLE_FIELDS)), Set.of());
+        }
+        return courseService.search(params, pageable, field, direction);
     }
 }

@@ -1,10 +1,6 @@
 package uk.gov.cslearning.catalogue.service;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import uk.gov.cslearning.catalogue.api.SearchResults;
@@ -322,5 +318,13 @@ public class CourseService {
 
     public SearchResults search(CourseSearchParameters params, Pageable pageable) {
         return courseRepository.search(pageable, params);
+    }
+
+    public SearchResults search(CourseSearchParameters params, Pageable pageable, String field, Sort.Direction direction) {
+        if (field != null && direction != null) {
+            return courseRepository.search(pageable, params, field, direction);
+        } else {
+            return this.search(params, pageable);
+        }
     }
 }

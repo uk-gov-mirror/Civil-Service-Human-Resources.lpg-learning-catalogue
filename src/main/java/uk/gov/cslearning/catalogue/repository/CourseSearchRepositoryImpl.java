@@ -3,10 +3,14 @@ package uk.gov.cslearning.catalogue.repository;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.script.Script;
+import org.elasticsearch.search.sort.ScriptSortBuilder;
+import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
@@ -33,6 +37,13 @@ public class CourseSearchRepositoryImpl implements CourseSearchRepository {
     public CourseSearchRepositoryImpl(ElasticsearchOperations operations) {
         checkArgument(operations != null);
         this.operations = operations;
+    }
+
+    @Override
+    public SearchResults search(Pageable pageable, CourseSearchParameters courseSearchParameters, String sortField, Sort.Direction sortDirection) {
+        Query searchQuery = getSearchQuery(pageable, courseSearchParameters, sortField, sortDirection).build();
+        Page<Course> coursePage = Utils.searchPageToPage(operations.search(searchQuery, Course.class), pageable);
+        return new SearchResults(coursePage, pageable);
     }
 
     @Override
@@ -133,7 +144,18 @@ public class CourseSearchRepositoryImpl implements CourseSearchRepository {
         return filterQuery;
     }
 
-    private NativeSearchQueryBuilder getSearchQuery(Pageable pageable, CourseSearchParameters courseSearchParameters) {
+    private NativeSearchQueryBuilder getSearchQuery(Pageable pageable, CourseSearchParameters courseSearchParameters, String fieldName,
+                                                            Sort.Direction direction) {
+        Script lowercase = new Script(String.format("doc['%s.keyword'].value.toLowerCase()", fieldName));
+        SortBuilder<ScriptSortBuilder> sortBuilder = SortBuilders
+                .scriptSort(lowercase, ScriptSortBuilder.ScriptSortType.STRING)
+                .order(SortOrder.fromString(direction.name()));
+        return getSearchQuery(courseSearchParameters)
+                .withSort(sortBuilder)
+                .withPageable(pageable);
+    }
+
+    private NativeSearchQueryBuilder getSearchQuery(CourseSearchParameters courseSearchParameters) {
         BoolQueryBuilder boolQuery = getSearchBuilderQuery(courseSearchParameters);
         BoolQueryBuilder filterQuery = boolQuery();
 
@@ -143,7 +165,11 @@ public class CourseSearchRepositoryImpl implements CourseSearchRepository {
 
         return new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
-                .withFilter(filterQuery)
+                .withFilter(filterQuery);
+    }
+
+    private NativeSearchQueryBuilder getSearchQuery(Pageable pageable, CourseSearchParameters courseSearchParameters) {
+        return getSearchQuery(courseSearchParameters)
                 .withSort(SortBuilders.scoreSort().order(SortOrder.DESC))
                 .withPageable(pageable);
     }
