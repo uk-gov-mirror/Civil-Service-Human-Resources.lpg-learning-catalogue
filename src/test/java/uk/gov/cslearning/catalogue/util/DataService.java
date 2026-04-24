@@ -47,6 +47,7 @@ public class DataService {
         // Required learning
 
         Course requiredCourse1 = createCourse("Required course 1");
+        requiredCourse1.setId("req-course-1");
         requiredCourse1.setAudiences(Set.of(
                 createRequiredLearningAudience(Set.of("HMRC", "CO")),
                 createAudience(Set.of("DWP"), Collections.emptySet(), Collections.emptySet(), Collections.emptySet())
@@ -54,6 +55,7 @@ public class DataService {
         courses.add(requiredCourse1);
 
         Course requiredCourse2 = createCourse("Required course 2");
+        requiredCourse2.setId("req-course-2");
         Audience requiredAudience = createRequiredLearningAudience(Set.of("HMRC"));
         requiredAudience.setRequiredBy(Instant.now().plus(7L, ChronoUnit.DAYS));
         requiredCourse2.setAudiences(Set.of(
@@ -94,6 +96,7 @@ public class DataService {
         // Single module courses
 
         Course elearningCourse = createCourse("ELearning course");
+        elearningCourse.setId("elearning-course");
         elearningCourse.setModules(Collections.singletonList(
                 createELearningModule()
         ));

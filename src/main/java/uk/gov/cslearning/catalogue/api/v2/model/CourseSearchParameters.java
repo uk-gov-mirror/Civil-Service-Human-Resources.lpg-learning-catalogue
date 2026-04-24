@@ -16,6 +16,7 @@ public class CourseSearchParameters {
     List<String> types = Collections.emptyList();
     String cost;
 
+    List<String> courseIds = Collections.emptyList();
     List<String> departments = Collections.emptyList();
     List<String> areasOfWork = Collections.emptyList();
     List<String> interests = Collections.emptyList();
