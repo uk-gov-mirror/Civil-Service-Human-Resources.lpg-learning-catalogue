@@ -64,32 +64,12 @@ public class SearchControllerTest {
                 .thenReturn(searchResults);
 
         mockMvc.perform(
-                get("/search/management/courses")
-                        .param("query", "test")
-                        .with(csrf()))
+                        get("/search/management/courses")
+                                .param("query", "test")
+                                .with(csrf()))
                 .andExpect(status().isOk());
 
         verify(civilServant).getOrganisationalUnitCode();
-    }
-
-    @Test
-    @WithMockUser(username = "user", authorities = {"PROFESSION_AUTHOR"})
-    public void shouldReturnSearchPageOfCoursesForProfessionAuthor() throws Exception {
-        PageImpl<Course> page = new PageImpl<>(Collections.emptyList());
-        SearchResults searchResults = new SearchResults(page, new PageParameters().getPageRequest());
-        CivilServant civilServant = mock(CivilServant.class);
-
-        when(registryService.getCurrentCivilServant()).thenReturn(civilServant);
-        when(courseRepository.search(any(Pageable.class), any(CourseSearchParameters.class), any(OwnerParameters.class)))
-                .thenReturn(searchResults);
-
-        mockMvc.perform(
-                get("/search/management/courses")
-                        .param("query", "test")
-                        .with(csrf()))
-                .andExpect(status().isOk());
-
-        verify(civilServant).getProfessionId();
     }
 
     @Test
@@ -104,9 +84,9 @@ public class SearchControllerTest {
                 .thenReturn(searchResults);
 
         mockMvc.perform(
-                get("/search/management/courses")
-                        .param("query", "test")
-                        .with(csrf()))
+                        get("/search/management/courses")
+                                .param("query", "test")
+                                .with(csrf()))
                 .andExpect(status().isOk());
     }
 
@@ -122,9 +102,9 @@ public class SearchControllerTest {
                 .thenReturn(searchResults);
 
         mockMvc.perform(
-                get("/search/management/courses")
-                        .param("query", "test")
-                        .with(csrf()))
+                        get("/search/management/courses")
+                                .param("query", "test")
+                                .with(csrf()))
                 .andExpect(status().isOk());
     }
 
@@ -132,9 +112,9 @@ public class SearchControllerTest {
     @WithMockUser(username = "user", authorities = {"INVALID_ROLE"})
     public void shouldReturnSearchPageOfCoursesForInvalidRoles() throws Exception {
         mockMvc.perform(
-                get("/search/management/courses")
-                        .param("query", "test")
-                        .with(csrf()))
+                        get("/search/management/courses")
+                                .param("query", "test")
+                                .with(csrf()))
                 .andExpect(status().isForbidden());
     }
 }

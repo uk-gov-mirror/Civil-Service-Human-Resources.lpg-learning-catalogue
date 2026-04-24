@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
@@ -98,10 +97,10 @@ public class CourseControllerTest {
                 });
 
         mockMvc.perform(
-                post("/courses").with(csrf())
-                        .content(objectMapper.writeValueAsString(course))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        post("/courses").with(csrf())
+                                .content(objectMapper.writeValueAsString(course))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("location", "http://localhost/courses/" + newId));
     }
@@ -131,7 +130,7 @@ public class CourseControllerTest {
         userOtherAreasOfWork.add(otherAreaOfWork);
         civilServant.setOtherAreasOfWork(userOtherAreasOfWork);
 
-        OrganisationalUnit organisationalUnit= new OrganisationalUnit();
+        OrganisationalUnit organisationalUnit = new OrganisationalUnit();
         organisationalUnit.setCode("co");
         civilServant.setOrganisationalUnit(organisationalUnit);
 
@@ -176,13 +175,13 @@ public class CourseControllerTest {
                 .thenReturn(new PageImpl<>(singletonList(course)));
 
         mockMvc.perform(
-                get("/courses/")
-                        .param("areaOfWork", areaOfWork)
-                        .param("department", department)
-                        .param("interest", interest)
-                        .param("status", status)
-                        .param("grade", grade)
-                        .with(csrf()))
+                        get("/courses/")
+                                .param("areaOfWork", areaOfWork)
+                                .param("department", department)
+                                .param("interest", interest)
+                                .param("status", status)
+                                .param("grade", grade)
+                                .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results[0].id", equalTo(course.getId())));
     }
@@ -196,8 +195,8 @@ public class CourseControllerTest {
                 .thenReturn(new PageImpl<>(Collections.singletonList(course)));
 
         mockMvc.perform(
-                get("/courses/")
-                        .with(csrf()))
+                        get("/courses/")
+                                .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results[0].id", equalTo(course.getId())));
     }
@@ -210,9 +209,9 @@ public class CourseControllerTest {
                 .thenReturn(new PageImpl<>(Collections.singletonList(course)));
 
         mockMvc.perform(
-                get("/courses/")
-                        .param("status", "Draft", "Published", "Archived")
-                        .with(csrf()))
+                        get("/courses/")
+                                .param("status", "Draft", "Published", "Archived")
+                                .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results[0].id", equalTo(course.getId())));
     }
@@ -242,7 +241,7 @@ public class CourseControllerTest {
         userOtherAreasOfWork.add(otherAreaOfWork);
         civilServant.setOtherAreasOfWork(userOtherAreasOfWork);
 
-        OrganisationalUnit organisationalUnit= new OrganisationalUnit();
+        OrganisationalUnit organisationalUnit = new OrganisationalUnit();
         organisationalUnit.setCode("co");
         civilServant.setOrganisationalUnit(organisationalUnit);
 
@@ -287,10 +286,10 @@ public class CourseControllerTest {
                 .thenReturn(new PageImpl<>(singletonList(course)));
 
         mockMvc.perform(
-                get("/courses/")
-                        .param("areaOfWork", areaOfWork)
-                        .param("grade", grade)
-                        .with(csrf()))
+                        get("/courses/")
+                                .param("areaOfWork", areaOfWork)
+                                .param("grade", grade)
+                                .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results[0].id", equalTo(course.getId())));
     }
@@ -322,7 +321,7 @@ public class CourseControllerTest {
         userOtherAreasOfWork.add(otherAreaOfWork);
         civilServant.setOtherAreasOfWork(userOtherAreasOfWork);
 
-        OrganisationalUnit organisationalUnit= new OrganisationalUnit();
+        OrganisationalUnit organisationalUnit = new OrganisationalUnit();
         organisationalUnit.setCode("co");
         civilServant.setOrganisationalUnit(organisationalUnit);
 
@@ -368,43 +367,14 @@ public class CourseControllerTest {
                 .thenReturn(new PageImpl<>(singletonList(course)));
 
         mockMvc.perform(
-                get("/courses/")
-                        .param("areaOfWork", "area-of-work1", "area-of-work2")
-                        .param("department", "department1", "department2")
-                        .param("interest", "interest1", "interest2")
-                        .param("grade", grade)
-                        .with(csrf()))
+                        get("/courses/")
+                                .param("areaOfWork", "area-of-work1", "area-of-work2")
+                                .param("department", "department1", "department2")
+                                .param("interest", "interest1", "interest2")
+                                .param("grade", grade)
+                                .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results[0].id", equalTo(course.getId())));
-    }
-
-    @Test
-    public void shouldGetRequiredLearningByOrgCodeMap() throws Exception {
-        Map<String, List<String>> organisationalUnitsParentMap = new HashMap<>();
-        List<String> departmentsList = Arrays.asList("dept1", "dept2");
-        List<Course> courseList = Arrays.asList(new Course(), new Course());
-
-        when(courseService.getOrganisationParentsMap()).thenReturn(organisationalUnitsParentMap);
-        when(courseRepository.findMandatoryOfMultipleDepts(departmentsList, "Published", PageRequest.of(0, 10000))).thenReturn(courseList);
-        mockMvc.perform(
-                get("/courses/required")
-                        .with(csrf()))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    public void shouldGetRequiredLearningByOrgCodeMapWithParams() throws Exception {
-        Map<String, List<String>> organisationalUnitsParentMap = new HashMap<>();
-        List<String> departmentsList = Arrays.asList("dept1", "dept2");
-        List<Course> courseList = Arrays.asList(new Course(), new Course());
-
-        when(courseService.getOrganisationParentsMap()).thenReturn(organisationalUnitsParentMap);
-        when(courseRepository.findMandatoryOfMultipleDepts(departmentsList, "Published", PageRequest.of(0, 10000))).thenReturn(courseList);
-        mockMvc.perform(
-                get("/courses/required")
-                        .param("days", "7")
-                        .with(csrf()))
-                .andExpect(status().isOk());
     }
 
     @Test
@@ -423,29 +393,8 @@ public class CourseControllerTest {
         when(courseService.findCoursesByOrganisationalUnit(any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(course)));
 
         mockMvc.perform(
-                get("/courses/management")
-                        .with(csrf()))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(username = "user", authorities = {"PROFESSION_AUTHOR"})
-    public void shouldListForProfession() throws Exception {
-        Course course = new Course();
-
-        CivilServant civilServant = new CivilServant();
-        OrganisationalUnit organisationalUnit = new OrganisationalUnit();
-        String code = "code";
-        organisationalUnit.setCode(code);
-        civilServant.setOrganisationalUnit(organisationalUnit);
-
-        when(registryService.getCurrentCivilServant())
-                .thenReturn(civilServant);
-        when(courseService.findCoursesByProfession(any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(course)));
-
-        mockMvc.perform(
-                get("/courses/management")
-                        .with(csrf()))
+                        get("/courses/management")
+                                .with(csrf()))
                 .andExpect(status().isOk());
     }
 
@@ -465,8 +414,8 @@ public class CourseControllerTest {
         when(courseService.findCoursesBySupplier(any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(course)));
 
         mockMvc.perform(
-                get("/courses/management")
-                        .with(csrf()))
+                        get("/courses/management")
+                                .with(csrf()))
                 .andExpect(status().isOk());
     }
 
@@ -478,8 +427,8 @@ public class CourseControllerTest {
         when(courseService.findAllCourses(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.singletonList(course)));
 
         mockMvc.perform(
-                get("/courses/management")
-                        .with(csrf()))
+                        get("/courses/management")
+                                .with(csrf()))
                 .andExpect(status().isOk());
     }
 
@@ -487,8 +436,8 @@ public class CourseControllerTest {
     @WithMockUser(username = "user", authorities = {"INVALID_ROLE"})
     public void shouldReturnForbiddenForCslAuthor() throws Exception {
         mockMvc.perform(
-                get("/courses/management")
-                        .with(csrf()))
+                        get("/courses/management")
+                                .with(csrf()))
                 .andExpect(status().isForbidden());
     }
 
@@ -498,8 +447,8 @@ public class CourseControllerTest {
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(
-                get("/courses/abc")
-                        .accept(MediaType.APPLICATION_JSON))
+                        get("/courses/abc")
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
@@ -513,26 +462,10 @@ public class CourseControllerTest {
                 .thenReturn(Optional.of(course));
 
         mockMvc.perform(
-                get("/courses/1")
-                        .accept(MediaType.APPLICATION_JSON))
+                        get("/courses/1")
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", equalTo("title")));
-    }
-
-    @Test
-    public void shouldReturnCoursesByIds() throws Exception {
-        List<String> courses = Arrays.asList("1");
-        Iterable<Course> result = new ArrayList<>();
-
-        when(courseRepository.findAllById(courses))
-                .thenReturn(result);
-
-        mockMvc.perform(
-                post("/courses/getIds").with(csrf())
-                        .content(objectMapper.writeValueAsString(courses))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
     }
 
     @Test
@@ -547,10 +480,10 @@ public class CourseControllerTest {
         when(moduleService.save(eq(courseId), any(Module.class))).thenReturn(module);
 
         mockMvc.perform(
-                post(String.format("/courses/%s/modules/", courseId)).with(csrf())
-                        .content(json)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        post(String.format("/courses/%s/modules/", courseId)).with(csrf())
+                                .content(json)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", String.format("http://localhost/courses/%s/modules/%s", courseId, moduleId)));
     }
@@ -566,8 +499,8 @@ public class CourseControllerTest {
         when(moduleService.find(courseId, moduleId)).thenReturn(Optional.of(module));
 
         mockMvc.perform(
-                get(String.format("/courses/%s/modules/%s", courseId, moduleId)).with(csrf())
-                        .accept(MediaType.APPLICATION_JSON))
+                        get(String.format("/courses/%s/modules/%s", courseId, moduleId)).with(csrf())
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.url", equalTo(url)));
     }
@@ -581,8 +514,8 @@ public class CourseControllerTest {
         when(moduleService.find(courseId, moduleId)).thenReturn(Optional.empty());
 
         mockMvc.perform(
-                get(String.format("/courses/%s/modules/%s", courseId, moduleId)).with(csrf())
-                        .accept(MediaType.APPLICATION_JSON))
+                        get(String.format("/courses/%s/modules/%s", courseId, moduleId)).with(csrf())
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
@@ -594,8 +527,8 @@ public class CourseControllerTest {
         doNothing().when(moduleService).deleteModule(courseId, moduleId);
 
         mockMvc.perform(
-                delete(String.format("/courses/%s/modules/%s", courseId, moduleId)).with(csrf())
-                        .accept(MediaType.APPLICATION_JSON))
+                        delete(String.format("/courses/%s/modules/%s", courseId, moduleId)).with(csrf())
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
 
@@ -630,10 +563,10 @@ public class CourseControllerTest {
         when(moduleService.updateModule(courseId, updatedModule)).thenReturn(updatedCourse);
 
         mockMvc.perform(
-                put(String.format("/courses/%s/modules/%s", courseId, module.getId())).with(csrf())
-                        .content(objectMapper.writeValueAsString(updatedModule))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        put(String.format("/courses/%s/modules/%s", courseId, module.getId())).with(csrf())
+                                .content(objectMapper.writeValueAsString(updatedModule))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
         assertThat(updatedCourse.getModules().isEmpty(), is(false));
@@ -657,10 +590,10 @@ public class CourseControllerTest {
         when(eventService.save(eq(courseId), eq(moduleId), any(Event.class))).thenReturn(event);
 
         mockMvc.perform(
-                post(String.format("/courses/%s/modules/%s/events", courseId, moduleId)).with(csrf())
-                        .content(objectMapper.writeValueAsString(event))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        post(String.format("/courses/%s/modules/%s/events", courseId, moduleId)).with(csrf())
+                                .content(objectMapper.writeValueAsString(event))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
     }
 
@@ -676,10 +609,10 @@ public class CourseControllerTest {
         when(eventService.find(courseId, moduleId, eventId)).thenReturn(Optional.of(event));
 
         mockMvc.perform(
-                get(String.format("/courses/%s/modules/%s/events/%s", courseId, moduleId, eventId)).with(csrf())
-                        .content(objectMapper.writeValueAsString(event))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        get(String.format("/courses/%s/modules/%s/events/%s", courseId, moduleId, eventId)).with(csrf())
+                                .content(objectMapper.writeValueAsString(event))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
@@ -692,8 +625,8 @@ public class CourseControllerTest {
         when(eventService.find(courseId, moduleId, eventId)).thenReturn(Optional.empty());
 
         mockMvc.perform(
-                get(String.format("/courses/%s/modules/%s/events/%s", courseId, moduleId, eventId)).with(csrf())
-                        .accept(MediaType.APPLICATION_JSON))
+                        get(String.format("/courses/%s/modules/%s/events/%s", courseId, moduleId, eventId)).with(csrf())
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
@@ -744,10 +677,10 @@ public class CourseControllerTest {
         when(courseRepository.save(course)).thenReturn(course);
 
         mockMvc.perform(
-                put(String.format("/courses/%s/modules/%s/events/%s", course.getId(), module.getId(), oldEvent.getId())).with(csrf())
-                        .content(objectMapper.writeValueAsString(newEvent))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        put(String.format("/courses/%s/modules/%s/events/%s", course.getId(), module.getId(), oldEvent.getId())).with(csrf())
+                                .content(objectMapper.writeValueAsString(newEvent))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
 
@@ -782,7 +715,7 @@ public class CourseControllerTest {
         when(courseRepository.save(course)).thenReturn(course);
 
         mockMvc.perform(
-                delete(String.format("/courses/%s/modules/%s/events/%s", course.getId(), module.getId(), event.getId())).with(csrf()))
+                        delete(String.format("/courses/%s/modules/%s/events/%s", course.getId(), module.getId(), event.getId())).with(csrf()))
                 .andExpect(status().isNoContent());
 
         assert (module.getEvents().isEmpty());
@@ -801,10 +734,10 @@ public class CourseControllerTest {
         when(audienceService.save(any(), any())).thenReturn(new Course());
 
         mockMvc.perform(
-                post(String.format("/courses/%s/audiences/", courseId)).with(csrf())
-                        .content(objectMapper.writeValueAsString(ImmutableMap.of("id", audienceId, "name", "Audience name")))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        post(String.format("/courses/%s/audiences/", courseId)).with(csrf())
+                                .content(objectMapper.writeValueAsString(ImmutableMap.of("id", audienceId, "name", "Audience name")))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", String.format("http://localhost/courses/%s/audiences/%s", courseId, audienceId)));
     }
@@ -821,8 +754,8 @@ public class CourseControllerTest {
         when(audienceService.find(courseId, audienceId)).thenReturn(Optional.of(audience));
 
         mockMvc.perform(
-                get(String.format("/courses/%s/audiences/%s", courseId, audienceId)).with(csrf())
-                        .accept(MediaType.APPLICATION_JSON))
+                        get(String.format("/courses/%s/audiences/%s", courseId, audienceId)).with(csrf())
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(audienceId)));
     }
@@ -836,8 +769,8 @@ public class CourseControllerTest {
         when(audienceService.find(courseId, audienceId)).thenReturn(Optional.empty());
 
         mockMvc.perform(
-                get(String.format("/courses/%s/audiences/%s", courseId, audienceId)).with(csrf())
-                        .accept(MediaType.APPLICATION_JSON))
+                        get(String.format("/courses/%s/audiences/%s", courseId, audienceId)).with(csrf())
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
@@ -853,8 +786,8 @@ public class CourseControllerTest {
         doThrow(resourceNotFoundException()).when(audienceService).save(courseId, audience);
 
         mockMvc.perform(
-                get(String.format("/courses/%s/audiences/%s", courseId, audienceId)).with(csrf())
-                        .accept(MediaType.APPLICATION_JSON))
+                        get(String.format("/courses/%s/audiences/%s", courseId, audienceId)).with(csrf())
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
@@ -874,7 +807,7 @@ public class CourseControllerTest {
         assertThat(course.getAudiences().isEmpty(), is(not(true)));
 
         mockMvc.perform(
-                delete(String.format("/courses/%s/audiences/%s", course.getId(), audience.getId())).with(csrf()))
+                        delete(String.format("/courses/%s/audiences/%s", course.getId(), audience.getId())).with(csrf()))
                 .andExpect(status().isNoContent());
 
         assertThat(course.getAudiences().isEmpty(), is(true));

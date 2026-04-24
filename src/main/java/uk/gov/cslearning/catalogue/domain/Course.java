@@ -94,15 +94,7 @@ public class Course {
     public List<Audience> getRequiredAudiences() {
         return getAudiences().stream().filter(Audience::isRequired).collect(Collectors.toList());
     }
-
-    @JsonIgnore
-    public List<Audience> getMandatoryAudiencesForDepartments(List<String> departmentCodes) {
-        return getAudiences()
-                .stream()
-                .filter(audience -> audience.isRequiredForDepartments(departmentCodes))
-                .collect(Collectors.toList());
-    }
-
+    
     @JsonIgnore
     public void upsertModule(Module newModule) {
         List<Module> mods = new ArrayList<>(getModules());

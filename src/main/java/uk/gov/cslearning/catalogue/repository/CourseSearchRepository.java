@@ -12,10 +12,10 @@ public interface CourseSearchRepository {
     SearchResults search(Pageable pageable, CourseSearchParameters courseSearchParameters, String sortField, Sort.Direction sortDirection);
 
     SearchResults search(Pageable pageable, CourseSearchParameters courseSearchParameters);
-    SearchResults search(Pageable pageable, CourseSearchParameters courseSearchParameters, OwnerParameters ownerParameters);
-    Page<Course> findAllByOrganisationCode(String organisationalUnitCode, Pageable pageable);
 
-    Page<Course> findAllByProfessionId(String professionId, Pageable pageable);
+    SearchResults search(Pageable pageable, CourseSearchParameters courseSearchParameters, OwnerParameters ownerParameters);
+
+    Page<Course> findAllByOrganisationCode(String organisationalUnitCode, Pageable pageable);
 
     Page<Course> findAllBySupplier(String supplier, Pageable pageable);
 }

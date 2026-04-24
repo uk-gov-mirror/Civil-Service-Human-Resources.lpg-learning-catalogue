@@ -5,9 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -78,6 +76,7 @@ public class CourseController {
 
         return ResponseEntity.created(builder.path("/courses/{courseId}").build(newCourse.getId())).build();
     }
+
     @GetMapping
     public ResponseEntity<PageResults<Course>> list(@RequestParam(name = "areaOfWork", defaultValue = ELASTIC_EMPTY_PARAM) String areasOfWork,
                                                     @RequestParam(name = "department", defaultValue = ELASTIC_EMPTY_PARAM) String departments,
@@ -125,7 +124,7 @@ public class CourseController {
                     // Show any courses with AOW (audience could also have a dept/interest so filter it if it does
                     // ie, if your dept is CO and it has been flagged as required for CO, you would not want it appearing here for you also...
                     if (audience.getAreasOfWork().contains(areasOfWork) && audience.getGrades().contains(grade)
-                            && (audience.getDepartments().isEmpty() || containsAny(audience.getDepartments(),organisationParentChild))
+                            && (audience.getDepartments().isEmpty() || containsAny(audience.getDepartments(), organisationParentChild))
                             && (audience.getInterests().isEmpty() || containsAny(audience.getInterests(), interestNames))) {
                         filteredCourses.add(course);
                     }
@@ -133,7 +132,7 @@ public class CourseController {
                     // Show any courses with Interest (audience could also have a dept/aow so filter it if it does
                     // ie, if your dept is CO and it has been flagged as required for CO, you would not want it appearing here for you also...
                     if (audience.getInterests().contains(interests) && audience.getGrades().contains(grade)
-                            && (audience.getDepartments().isEmpty() || containsAny(audience.getDepartments(),organisationParentChild))
+                            && (audience.getDepartments().isEmpty() || containsAny(audience.getDepartments(), organisationParentChild))
                             && isAreaOfWorkValid(audience, otherAreasOfWorkNames, professionName)) {
                         filteredCourses.add(course);
                     }
@@ -150,152 +149,12 @@ public class CourseController {
         return ResponseEntity.ok(new PageResults<>(results, pageable));
     }
 
-    @GetMapping(value = "/getrequiredlearning")
-    public ResponseEntity<PageResults<Course>> listMandatory(@PageableDefault(size = 100) Pageable pageable) {
-        CivilServant civilServant = registryService.getCurrentCivilServant();
-
-        String userName = ELASTIC_EMPTY_PARAM;
-        String professionName = ELASTIC_EMPTY_PARAM;
-        String grade = ELASTIC_EMPTY_PARAM;
-        String organisationCode = ELASTIC_EMPTY_PARAM;
-
-        if (civilServant.getFullName().isPresent()) {
-            userName = civilServant.getFullName().get();
-        }
-
-        if (civilServant.getProfessionName().isPresent()) {
-            professionName = civilServant.getProfessionName().get();
-        }
-
-        if (civilServant.getGrade().isPresent()) {
-            grade = civilServant.getGradeCode().get();
-        }
-
-        if (civilServant.getOrganisationalUnitCode().isPresent()) {
-            organisationCode = civilServant.getOrganisationalUnitCode().get();
-        }
-
-        List<Profession> otherAreasOfWork = (civilServant.getOtherAreasOfWork());
-        List<Interest> interests = civilServant.getInterests();
-
-        List<String> organisationParentandChild = courseService.getOrganisationParents(organisationCode);
-
-        List<String> interestNames = interests.stream()
-            .map(Interest::getName)
-            .collect(collectingAndThen(toList(), this::listWithNone));
-
-        List<String> otherAreasOfWorkNames = otherAreasOfWork.stream()
-            .map(Profession::getName)
-            .collect(collectingAndThen(toList(), this::listWithNone));
-
-        LOGGER.debug("Listing Required Learning courses for user {}", userName);
-
-        Page<Course> results = courseService.getRequiredCourses(professionName, grade, organisationParentandChild, otherAreasOfWorkNames, interestNames, COURSE_STATUS, pageable);
-
-        ArrayList<Course> filteredCourses = new ArrayList<>();
-
-        for (Course course : results) {
-            for (Audience audience : course.getAudiences()) {
-                for (String organisation : organisationParentandChild) {
-                    if (audience.getDepartments().contains(organisation)
-                        && doesCourseAudienceMatchUserProfile(audience, grade, interestNames, otherAreasOfWorkNames, professionName)) {
-                        filteredCourses.add(course);
-                    }
-                }
-            }
-        }
-
-        Set<Course> set = new LinkedHashSet<>();
-        set.addAll(filteredCourses);
-        filteredCourses.clear();
-        filteredCourses.addAll(set);
-        results = new PageImpl<>(filteredCourses, pageable, filteredCourses.size());
-
-        return ResponseEntity.ok(new PageResults<>(results, pageable));
-    }
-
-    @GetMapping(params = {"mandatory", "department"})
-    public ResponseEntity<PageResults<Course>> listMandatory(@RequestParam("department") List<String> departments,
-            @RequestParam(value = "status", defaultValue = "Published") String status,
-            Pageable pageable) {
-        LOGGER.debug("Listing mandatory courses for departments {}", departments);
-        List<Course> courses = courseRepository.findMandatoryOfMultipleDepts(departments, "Published", PageRequest.of(0, 10000));
-        Set<String> courseIdSet = new HashSet<>();
-        List<Course> coursesWithValidAudience = courses
-                .stream()
-                .filter(course -> courseIdSet.add(course.getId()))
-                .map(course -> getMandatoryCourseForDepartments(course, departments))
-                .filter(Objects::nonNull)
-                .sorted(Comparator.comparing(Course::getTitle))
-                .collect(toList());
-
-        return ResponseEntity.ok(new PageResults<>(courseService.prepareCoursePage(pageable, coursesWithValidAudience), pageable));
-    }
-
-    Course getMandatoryCourseForDepartments(Course course, List<String> departments) {
-        List<Audience> relevantAudiences = course.getMandatoryAudiencesForDepartments(departments);
-
-        Course mandatoryCourse = null;
-        if (!relevantAudiences.isEmpty()) {
-            mandatoryCourse = course;
-            Set<Audience> audiences = new HashSet<>(relevantAudiences);
-            mandatoryCourse.setAudiences(audiences);
-        }
-
-        return mandatoryCourse;
-    }
-
     @GetMapping(params = {"mandatory", "days"})
     public ResponseEntity<Map<String, List<Course>>> listMandatoryByDueDays(@RequestParam(value = "days", defaultValue = "1") String days) {
         LOGGER.debug("Listing mandatory courses");
         List<Course> courses = courseService.fetchMandatoryCoursesByDueDate(DaysMapper.convertDaysFromTextToNumeric(days));
 
         return ResponseEntity.ok(courseService.groupByOrganisationCode(courses));
-    }
-
-    @GetMapping(value = "/required")
-    public ResponseEntity<Map<String, List<Course>>> getRequiredLearningByOrgCodeMap() {
-        Map<String, List<Course>> requiredCoursesByOrgCode = new HashMap<>();
-
-        Map<String, List<String>> organisationParentsMap = courseService.getOrganisationParentsMap();
-        organisationParentsMap.forEach((s, organisationalUnitList) -> {
-            LOGGER.info("Getting required courses for {}", s);
-
-            List<Course> courses = courseRepository.findMandatoryOfMultipleDepts(organisationalUnitList, "Published", PageRequest.of(0, 10000));
-
-            Set<String> courseSet = new HashSet<>();
-            List<Course> filteredCourses = courses
-                    .stream()
-                    .filter(e -> courseSet.add(e.getId()))
-                    .collect(Collectors.toList());
-
-            requiredCoursesByOrgCode.put(s, filteredCourses);
-        });
-        return ResponseEntity.ok(requiredCoursesByOrgCode);
-    }
-
-    @GetMapping(value = "/required", params = {"from", "to"})
-    public ResponseEntity<Map<String, List<Course>>> getRequiredLearningByOrgCodeMapDueWithinRange(@RequestParam("from") long from, @RequestParam("to") long to) {
-        Map<String, List<Course>> requiredCoursesByOrgCode = new HashMap<>();
-
-        Map<String, List<String>> organisationParentsMap = courseService.getOrganisationParentsMap();
-        organisationParentsMap.forEach((s, organisationalUnitList) -> {
-            LOGGER.info("Getting required courses for {}", s);
-
-            List<Course> courses = courseRepository.findMandatoryOfMultipleDepts(organisationalUnitList, "Published", PageRequest.of(0, 10000));
-
-            Set<String> courseSet = new HashSet<>();
-            List<Course> filteredCourses = courses
-                    .stream()
-                    .filter(e -> courseSet.add(e.getId()))
-                    .filter(course -> courseService.isCourseRequiredWithinRangeForOrg(course, organisationalUnitList, from, to))
-                    .collect(Collectors.toList());
-
-            if (!filteredCourses.isEmpty()) {
-                requiredCoursesByOrgCode.put(s, filteredCourses);
-            }
-        });
-        return ResponseEntity.ok(requiredCoursesByOrgCode);
     }
 
     @GetMapping(value = "/management")
@@ -314,13 +173,7 @@ public class CourseController {
                 Page<Course> results = courseService.findCoursesByOrganisationalUnit(orgCodeOpt.get(), pageable);
                 response = new ResponseEntity<>(new PageResults<>(results, pageable), OK);
             }
-        } else if (Utils.hasRole("PROFESSION_AUTHOR")) {
-            Optional<Long> professionIdOpt = civilServant.getProfessionId();
-            if (professionIdOpt.isPresent()) {
-                Page<Course> results = courseService.findCoursesByProfession(professionIdOpt.toString(), pageable);
-                response = new ResponseEntity<>(new PageResults<>(results, pageable), OK);
-            }
-        } else if (Utils.hasRoles(new String[]{"KPMG_SUPPLIER_AUTHOR", "KORNFERRY_SUPPLIER_AUTHOR", "KNOWLEDGEPOOL_SUPPLIER_AUTHOR"})) {
+        } else if (Utils.hasRoles(new String[]{"KPMG_SUPPLIER_AUTHOR"})) {
             Page<Course> results = courseService.findCoursesBySupplier(authentication, pageable);
             response = new ResponseEntity<>(new PageResults<>(results, pageable), OK);
         } else {
@@ -336,15 +189,6 @@ public class CourseController {
         Iterable<Course> result = courseRepository.findAllById(courseIds);
         return new ResponseEntity<>(result, OK);
     }
-
-
-    @PostMapping(value = "/getIds")
-    public ResponseEntity<Iterable<Course>> getIds(@RequestBody List<String> courseIds) {
-        LOGGER.debug("Getting courses with IDs {}", courseIds);
-        Iterable<Course> result = courseRepository.findAllById(courseIds);
-        return new ResponseEntity<>(result, OK);
-    }
-
 
     @GetMapping("/{courseId}")
     public ResponseEntity<Course> get(@PathVariable("courseId") String courseId,
@@ -367,14 +211,13 @@ public class CourseController {
 
     @DeleteMapping(path = "/{courseId}")
     @PreAuthorize("(hasAnyAuthority(T(uk.gov.cslearning.catalogue.domain.Roles).LEARNING_DELETE, T(uk.gov.cslearning.catalogue.domain.Roles).LEARNING_MANAGER, T(uk.gov.cslearning.catalogue.domain.Roles).CSL_AUTHOR))")
-    public ResponseEntity<Void> delete(@PathVariable("courseId") String courseId){
-        try{
+    public ResponseEntity<Void> delete(@PathVariable("courseId") String courseId) {
+        try {
             LOGGER.info("Deleting course with ID {} ", courseId);
             courseService.deleteCourseById(courseId);
             LOGGER.info("Course with ID {} deleted successfully.", courseId);
             return ResponseEntity.ok(null);
-        }
-        catch (CourseCannotByDeletedException e){
+        } catch (CourseCannotByDeletedException e) {
             LOGGER.error("Exception thrown while trying to delete course with ID {}: {}", courseId, e.getMessage());
             return ResponseEntity.status(CONFLICT).build();
         }
@@ -596,26 +439,8 @@ public class CourseController {
         return list;
     }
 
-    private boolean doesCourseAudienceMatchUserProfile(Audience audience, String grade, List<String> interestNames, List<String> otherAreasOfWorkNames, String professionName) {
-        return (isGradeValid(audience, grade)
-            && isInterestsValid(audience, interestNames)
-            && isAreaOfWorkValid(audience, otherAreasOfWorkNames, professionName)
-            && isCourseLearningTypeValid(audience));
-    }
-
-    private boolean isGradeValid(Audience audience, String grade) {
-        return (audience.getGrades().isEmpty() || audience.getGrades().contains(grade));
-    }
-
-    private boolean isInterestsValid(Audience audience, List<String> interestNames) {
-        return (audience.getInterests().isEmpty() || containsAny(audience.getInterests(), interestNames));
-    }
-
     private boolean isAreaOfWorkValid(Audience audience, List<String> otherAreasOfWorkNames, String professionName) {
         return (audience.getAreasOfWork().isEmpty() || ((containsAny(audience.getAreasOfWork(), otherAreasOfWorkNames)) || audience.getAreasOfWork().contains(professionName)));
     }
 
-    private boolean isCourseLearningTypeValid(Audience audience) {
-        return (audience.getType() != null && audience.getType().equals(Audience.Type.REQUIRED_LEARNING));
-    }
 }

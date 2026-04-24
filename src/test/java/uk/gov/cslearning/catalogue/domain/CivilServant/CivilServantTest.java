@@ -2,7 +2,6 @@ package uk.gov.cslearning.catalogue.domain.CivilServant;
 
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.cslearning.catalogue.domain.LearningProvider;
 
 import java.util.Optional;
 
@@ -85,26 +84,4 @@ public class CivilServantTest {
         assertEquals(civilServant.getProfessionName().get(), PROFESSION_NAME);
     }
 
-    @Test
-    public void shouldReturnEmptyOptionalIfNoLearningProviderId() {
-        CivilServant civilServant = new CivilServant();
-
-        LearningProvider learningProvider = new LearningProvider();
-        civilServant.setLearningProvider(learningProvider);
-
-        assertTrue(civilServant.getLearningProviderId().isPresent());
-    }
-
-
-    @Test
-    public void shouldReturnLearningProviderIdIfPresent() {
-        CivilServant civilServant = new CivilServant();
-
-        LearningProvider learningProvider = new LearningProvider();
-        learningProvider.setId(LEARNING_PROVIDER_UUID);
-        civilServant.setLearningProvider(learningProvider);
-
-        assertTrue(civilServant.getLearningProviderId().isPresent());
-        assertEquals(civilServant.getLearningProviderId().get(), LEARNING_PROVIDER_UUID);
-    }
 }

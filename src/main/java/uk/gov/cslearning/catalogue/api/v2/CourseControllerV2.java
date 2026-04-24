@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.cslearning.catalogue.api.PageResults;
 import uk.gov.cslearning.catalogue.api.SearchResults;
+import uk.gov.cslearning.catalogue.api.v2.model.CourseIdAudienceAttributeMap;
 import uk.gov.cslearning.catalogue.api.v2.model.CourseSearchParameters;
 import uk.gov.cslearning.catalogue.api.v2.model.GetCoursesParameters;
 import uk.gov.cslearning.catalogue.api.v2.model.RequiredLearningIdMap;
@@ -39,6 +40,13 @@ public class CourseControllerV2 {
         Page<Course> results = courseRepository.findSuggested(parameters, pageable);
         return ResponseEntity.ok(new PageResults<>(results, pageable));
     }
+
+    @GetMapping("/audience-attribute-map")
+    @ResponseBody
+    public CourseIdAudienceAttributeMap getCourseIdAudienceAttributeMap() {
+        return courseService.getCourseIdAudienceAttributeMap();
+    }
+
 
     @GetMapping("/required-learning-map")
     @ResponseBody

@@ -2,7 +2,6 @@ package uk.gov.cslearning.catalogue.domain.CivilServant;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import uk.gov.cslearning.catalogue.domain.LearningProvider;
 import uk.gov.cslearning.catalogue.domain.Scope;
 
 import java.util.ArrayList;
@@ -16,7 +15,6 @@ public class CivilServant {
     private Grade grade;
     private OrganisationalUnit organisationalUnit;
     private Profession profession;
-    private LearningProvider learningProvider;
     private String supplier;
     private List<Profession> otherAreasOfWork = new ArrayList<>();
     private List<Interest> interests = new ArrayList<>();
@@ -33,6 +31,7 @@ public class CivilServant {
     public List<Profession> getOtherAreasOfWork() {
         return otherAreasOfWork;
     }
+
     public Optional<String> getFullName() {
         return Optional.ofNullable(this.fullName);
     }
@@ -45,15 +44,11 @@ public class CivilServant {
         return Optional.ofNullable(this.profession);
     }
 
-    public Optional<LearningProvider> getLearningProvider() {
-        return Optional.ofNullable(this.learningProvider);
-    }
-
     public Optional<String> getOrganisationalUnitCode() {
         return getOrganisationalUnit().map(OrganisationalUnit::getCode);
     }
 
-    public Optional<String>getGradeCode() {
+    public Optional<String> getGradeCode() {
         return getGrade().map(Grade::getCode);
     }
 
@@ -63,10 +58,6 @@ public class CivilServant {
 
     public Optional<String> getProfessionName() {
         return getProfession().map(Profession::getName);
-    }
-
-    public Optional<String> getLearningProviderId() {
-        return getLearningProvider().map(LearningProvider::getId);
     }
 
 }

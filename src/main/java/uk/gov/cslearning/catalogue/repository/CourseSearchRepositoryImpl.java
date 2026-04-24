@@ -62,7 +62,7 @@ public class CourseSearchRepositoryImpl implements CourseSearchRepository {
         return new SearchResults(coursePage, pageable);
     }
 
-    private BoolQueryBuilder getSearchBuilderQuery(CourseSearchParameters parameters){
+    private BoolQueryBuilder getSearchBuilderQuery(CourseSearchParameters parameters) {
         BoolQueryBuilder searchQuery = boolQuery();
         String query = parameters.getQuery();
 
@@ -105,7 +105,7 @@ public class CourseSearchRepositoryImpl implements CourseSearchRepository {
 
     private BoolQueryBuilder getModuleTypeBoolQuery(List<String> moduleTypes) {
         BoolQueryBuilder typesQuery = boolQuery();
-        for(String type : moduleTypes){
+        for (String type : moduleTypes) {
             typesQuery
                     .should(matchQuery("modules.type", type))
                     .should(matchQuery("type", type));
@@ -115,7 +115,7 @@ public class CourseSearchRepositoryImpl implements CourseSearchRepository {
         return typesQuery;
     }
 
-    private NestedQueryBuilder getAudienceNestedQuery(List<String> departments, List<String> areasOfWork, List<String> interests){
+    private NestedQueryBuilder getAudienceNestedQuery(List<String> departments, List<String> areasOfWork, List<String> interests) {
         BoolQueryBuilder audiencesBoolQuery = boolQuery();
 
         departments.forEach(department -> audiencesBoolQuery.must(matchQuery("audiences.departments", department).operator(Operator.AND)));
@@ -145,7 +145,7 @@ public class CourseSearchRepositoryImpl implements CourseSearchRepository {
     }
 
     private NativeSearchQueryBuilder getSearchQuery(Pageable pageable, CourseSearchParameters courseSearchParameters, String fieldName,
-                                                            Sort.Direction direction) {
+                                                    Sort.Direction direction) {
         Script lowercase = new Script(String.format("doc['%s.keyword'].value.toLowerCase()", fieldName));
         SortBuilder<ScriptSortBuilder> sortBuilder = SortBuilders
                 .scriptSort(lowercase, ScriptSortBuilder.ScriptSortType.STRING)
@@ -179,20 +179,6 @@ public class CourseSearchRepositoryImpl implements CourseSearchRepository {
         BoolQueryBuilder boolQuery = boolQuery();
 
         boolQuery.must(matchQuery("owner.organisationalUnit", organisationalUnitCode));
-
-        Query searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(boolQuery)
-                .withPageable(pageable)
-                .build();
-
-        return Utils.searchPageToPage(operations.search(searchQuery, Course.class), pageable);
-    }
-
-    @Override
-    public Page<Course> findAllByProfessionId(String professionId, Pageable pageable) {
-        BoolQueryBuilder boolQuery = boolQuery();
-
-        boolQuery.must(matchQuery("owner.profession", professionId));
 
         Query searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)

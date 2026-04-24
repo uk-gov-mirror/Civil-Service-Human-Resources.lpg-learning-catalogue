@@ -9,18 +9,69 @@ import java.util.Arrays;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class CourseControllerV2Test extends IntegrationTestBase {
 
     @Test
     public void testGetRequiredLearningDepartmentMap() throws Exception {
         mvc.perform(get("/v2/courses/required-learning-map")
-                .with(csrf()))
-                .andExpect(jsonPath("$.departmentCodeMap.HMRC[0]").value("Required course 1"))
-                .andExpect(jsonPath("$.departmentCodeMap.HMRC[1]").value("Required course 2"))
-                .andExpect(jsonPath("$.departmentCodeMap.CO[0]").value("Required course 1"));
+                        .with(csrf()))
+                .andExpect(jsonPath("$.departmentCodeMap.HMRC[0]").value("req-course-1"))
+                .andExpect(jsonPath("$.departmentCodeMap.HMRC[1]").value("req-course-2"))
+                .andExpect(jsonPath("$.departmentCodeMap.CO[0]").value("req-course-1"));
+    }
+
+    @Test
+    public void testGetCourseIdAudienceAttributeMap() throws Exception {
+        String expectedJson = "{\n" +
+                "    \"areasOfWork\": {\n" +
+                "        \"Analysis\": [\n" +
+                "            \"elearning-course\",\n" +
+                "            \"Blended course 1\"\n" +
+                "        ],\n" +
+                "        \"Finance\": [\n" +
+                "            \"Private course 1\",\n" +
+                "            \"Blended course 2\"\n" +
+                "        ],\n" +
+                "        \"DDaT\": [\n" +
+                "            \"Learning 1\",\n" +
+                "            \"Blended course 3\"\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    \"departments\": {\n" +
+                "        \"MOD\": [\n" +
+                "            \"Learning 1\",\n" +
+                "            \"Blended course 3\"\n" +
+                "        ],\n" +
+                "        \"COD\": [\n" +
+                "            \"Video course\",\n" +
+                "            \"Learning 1\",\n" +
+                "            \"Blended course 2\",\n" +
+                "            \"Blended course 3\"\n" +
+                "        ],\n" +
+                "        \"CO\": [\n" +
+                "            \"req-course-2\"\n" +
+                "        ],\n" +
+                "        \"DWP\": [\n" +
+                "            \"Blended course 2\",\n" +
+                "            \"req-course-1\"\n" +
+                "        ]\n" +
+                "    },\n" +
+                "    \"interests\": {\n" +
+                "        \"EU\": [\n" +
+                "            \"File course\",\n" +
+                "            \"Blended course 1\"\n" +
+                "        ],\n" +
+                "        \"Parliament\": [\n" +
+                "            \"Blended course 1\"\n" +
+                "        ]\n" +
+                "    }\n" +
+                "}";
+        mvc.perform(get("/v2/courses/audience-attribute-map")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
     }
 
     @Test
