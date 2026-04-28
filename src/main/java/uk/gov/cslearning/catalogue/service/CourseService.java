@@ -299,7 +299,7 @@ public class CourseService {
         allCourses
                 .stream().filter(c -> c.getStatus().equals(Status.PUBLISHED))
                 .forEach(c -> c.getAudiences()
-                        .stream().filter(a -> a.getType().equals(Audience.Type.OPEN))
+                        .stream().filter(a -> a.getType() != null && a.getType().equals(Audience.Type.OPEN))
                         .forEach(a -> {
                             a.getAreasOfWork().forEach(aow -> areaOfWorkMap.merge(aow, new HashSet<>(Collections.singletonList(c.getId())), (existingIds, newIds) -> {
                                 existingIds.addAll(newIds);
