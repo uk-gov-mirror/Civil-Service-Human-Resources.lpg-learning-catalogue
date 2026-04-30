@@ -46,40 +46,6 @@ public interface CourseRepository extends ElasticsearchRepository<Course, String
             "}")
     List<Course> findAllPublishedRequiredLearning(Pageable pageable);
 
-    @Query("{\n" +
-            "        \"bool\": {\n" +
-            "            \"must\": [\n" +
-            "                {\n" +
-            "                    \"match\": {\n" +
-            "                        \"status\": \"?1\"\n" +
-            "                    }\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"nested\": {\n" +
-            "                        \"path\": \"audiences\",\n" +
-            "                        \"query\": {\n" +
-            "                            \"bool\": {\n" +
-            "                                \"must\": [\n" +
-            "                                    {\n" +
-            "                                        \"match\": {\n" +
-            "                                            \"audiences.type\": \"REQUIRED_LEARNING\"\n" +
-            "                                        }\n" +
-            "                                    },\n" +
-            "                                    {\n" +
-            "                                        \"match\": {\n" +
-            "                                            \"audiences.departments\": \"[?0]\"\n" +
-            "                                        }\n" +
-            "                                    }\n" +
-            "                                ]\n" +
-            "                            }\n" +
-            "                        }\n" +
-            "                    }\n" +
-            "                }\n" +
-            "            ]\n" +
-            "        }\n" +
-            "    }")
-    List<Course> findMandatoryOfMultipleDepts(List<String> department, String status, Pageable pageable);
-
     SearchResults search(Pageable pageable, CourseSearchParameters courseSearchParameters, OwnerParameters ownerParameters);
 
     Page<Course> findAllByStatusIn(Collection<Status> status, Pageable pageable);
@@ -88,9 +54,5 @@ public interface CourseRepository extends ElasticsearchRepository<Course, String
 
     Page<Course> findAllByOrganisationCode(String organisationalUnitCode, Pageable pageable);
 
-    Page<Course> findAllByProfessionId(String professionId, Pageable pageable);
-
     Page<Course> findAllBySupplier(String supplier, Pageable pageable);
-
-    void deleteCourseById(String id);
 }

@@ -15,9 +15,7 @@ import uk.gov.cslearning.catalogue.service.record.RequestEntityFactory;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class RegistryService {
@@ -76,19 +74,4 @@ public class RegistryService {
         return new ArrayList<>();
     }
 
-    public Map<String, List<String>> getOrganisationalUnitParentsMap() {
-        LOGGER.debug("Getting profile details for authenticated user");
-        RequestEntity requestEntity = requestEntityFactory.createGetRequest(getAllCodes);
-
-        ResponseEntity<Map<String, List<String>>> response = null;
-        try {
-            response = restOperations.exchange(requestEntity, parameterizedTypeReferenceFactory.createMapReference(String.class));
-        } catch (IllegalTypeException e) {
-            e.printStackTrace();
-        }
-        if (response.getBody() != null) {
-            return response.getBody();
-        }
-        return new HashMap<>();
-    }
 }

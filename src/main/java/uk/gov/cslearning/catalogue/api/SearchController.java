@@ -50,11 +50,7 @@ public class SearchController {
                 CivilServant civilServant = registryService.getCurrentCivilServant();
                 civilServant.getOrganisationalUnitCode().ifPresent(ownerParameters::setOrganisationalUnitCode);
                 return ResponseEntity.ok(courseRepository.search(pageable, parameters, ownerParameters));
-            } else if (Utils.hasRole("PROFESSION_AUTHOR")) {
-                CivilServant civilServant = registryService.getCurrentCivilServant();
-                civilServant.getProfessionId().ifPresent(organisationalUnitCode -> ownerParameters.setProfession(organisationalUnitCode.toString()));
-                return ResponseEntity.ok(courseRepository.search(pageable, parameters, ownerParameters));
-            } else if (Utils.hasRoles(new String[]{"KPMG_SUPPLIER_AUTHOR", "KORNFERRY_SUPPLIER_AUTHOR", "KNOWLEDGEPOOL_SUPPLIER_AUTHOR"})) {
+            } else if (Utils.hasRoles(new String[]{"KPMG_SUPPLIER_AUTHOR"})) {
                 ownerParameters.setSupplier(authoritiesService.getSupplier(authentication));
                 return ResponseEntity.ok(courseRepository.search(pageable, parameters, ownerParameters));
             }

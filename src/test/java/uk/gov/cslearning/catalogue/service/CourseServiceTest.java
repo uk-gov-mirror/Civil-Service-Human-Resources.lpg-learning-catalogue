@@ -31,7 +31,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -66,9 +67,6 @@ public class CourseServiceTest {
 
     @Mock
     private OwnerFactory ownerFactory;
-
-    @Mock
-    private RequiredByService requiredByService;
 
     @Mock
     private CourseValidator courseValidator;
@@ -128,19 +126,6 @@ public class CourseServiceTest {
     }
 
     @Test
-    public void shouldFindCoursesByProfession() {
-        List<Course> courses = new ArrayList<>();
-        courses.add(new Course());
-        courses.add(new Course());
-
-        Page<Course> coursesPage = new PageImpl<>(courses);
-
-        when(courseRepository.findAllByProfessionId(PROFESSION_ID.toString(), PAGEABLE)).thenReturn(coursesPage);
-
-        assertEquals(courseService.findCoursesByProfession(PROFESSION_ID.toString(), PAGEABLE), coursesPage);
-    }
-
-    @Test
     public void shouldFindAllCourses() {
         List<Course> courses = new ArrayList<>();
         courses.add(new Course());
@@ -172,7 +157,6 @@ public class CourseServiceTest {
 
         LearningProvider learningProvider = new LearningProvider();
         learningProvider.setId(LEARNING_PROVIDER_ID);
-        civilServant.setLearningProvider(learningProvider);
 
         when(registryService.getCurrentCivilServant()).thenReturn(civilServant);
         when(authoritiesService.getScope(authentication)).thenReturn(SCOPE);
@@ -264,71 +248,6 @@ public class CourseServiceTest {
     }
 
     @Test
-    public void shouldReturnOrganisationalUnitParentsMap() {
-        Map<String, List<String>> organisationalUnitParentsMap = new HashMap<>();
-
-        when(registryService.getOrganisationalUnitParentsMap()).thenReturn(organisationalUnitParentsMap);
-
-        assertEquals(organisationalUnitParentsMap, courseService.getOrganisationParentsMap());
-    }
-
-    @Test
-    public void shouldReturnTrueIfAudienceRequiredWithinDays() {
-        String co = "co";
-        String hmrc = "hmrc";
-        Set<String> departments1 = new HashSet<>(Arrays.asList(co, hmrc));
-
-        String moj = "moj";
-        String defra = "defra";
-        Set<String> departments2 = new HashSet<>(Arrays.asList(moj, defra));
-
-        Audience audience1 = new Audience();
-        audience1.setDepartments(departments1);
-
-        Audience audience2 = new Audience();
-        audience2.setDepartments(departments2);
-
-        Set<Audience> audiences = new HashSet<>(Arrays.asList(audience1, audience2));
-
-        Course course = new Course();
-        course.setAudiences(audiences);
-
-        List<String> codeList = Arrays.asList(co, hmrc);
-
-        when(requiredByService.isAudienceRequiredWithinRange(any(Audience.class), any(Instant.class), any(long.class), any(long.class))).thenReturn(true);
-
-        assertTrue(courseService.isCourseRequiredWithinRangeForOrg(course, codeList, 1L, 7L));
-    }
-
-    @Test
-    public void shouldReturnFalseIfAudienceNotRequiredWithinDays() {
-        String co = "co";
-        String hmrc = "hmrc";
-        Set<String> departments1 = new HashSet<>(Arrays.asList(co, hmrc));
-
-        String moj = "moj";
-        String defra = "defra";
-        Set<String> departments2 = new HashSet<>(Arrays.asList(moj, defra));
-
-        Audience audience1 = new Audience();
-        audience1.setDepartments(departments1);
-
-        Audience audience2 = new Audience();
-        audience2.setDepartments(departments2);
-
-        Set<Audience> audiences = new HashSet<>(Arrays.asList(audience1, audience2));
-
-        Course course = new Course();
-        course.setAudiences(audiences);
-
-        List<String> codeList = Arrays.asList(co, hmrc);
-
-        when(requiredByService.isAudienceRequiredWithinRange(any(Audience.class), any(Instant.class), any(long.class), any(long.class))).thenReturn(false);
-
-        assertFalse(courseService.isCourseRequiredWithinRangeForOrg(course, codeList, 1L, 7L));
-    }
-
-    @Test
     public void shouldFilterCoursesByAudiencesAndRequiredBy() {
         List<Course> courses = new ArrayList<>();
         Instant oneDay = prepareInstantWithDayDifference(1);
@@ -385,8 +304,8 @@ public class CourseServiceTest {
 
     private Instant prepareInstantWithDayDifference(int days) {
         return LocalDate.now()
-            .plusDays(days)
-            .atStartOfDay(ZoneId.systemDefault())
-            .toInstant();
+                .plusDays(days)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
     }
 }

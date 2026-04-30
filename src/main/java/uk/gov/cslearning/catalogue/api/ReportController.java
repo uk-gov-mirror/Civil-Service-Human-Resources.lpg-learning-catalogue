@@ -34,8 +34,6 @@ public class ReportController {
         ResponseEntity<Map<String, ModuleDto>> response = ResponseEntity.ok(moduleService.getModuleMap());
         if (Utils.hasRole("KPMG_SUPPLIER_REPORTER")) {
             response = ResponseEntity.ok(moduleService.getModuleMapForSupplier("KPMG", MAX_PAGEABLE));
-        } else if (Utils.hasRole("KORNFERRY_SUPPLIER_REPORTER")) {
-            response = ResponseEntity.ok(moduleService.getModuleMapForSupplier("KORNFERRY", MAX_PAGEABLE));
         }
         return response;
     }
@@ -50,8 +48,6 @@ public class ReportController {
         ResponseEntity<Map<String, EventDto>> response = ResponseEntity.ok(eventService.getEventMap());
         if (Utils.hasRole("KPMG_SUPPLIER_REPORTER")) {
             response = ResponseEntity.ok(eventService.getEventMapBySupplier("KPMG", MAX_PAGEABLE));
-        } else if (Utils.hasRole("KORNFERRY_SUPPLIER_REPORTER")) {
-            response = ResponseEntity.ok(eventService.getEventMapBySupplier("KORNFERRY", MAX_PAGEABLE));
         }
         return response;
     }

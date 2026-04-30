@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,7 +18,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -52,22 +50,10 @@ public abstract class IntegrationTestBase {
 
     static boolean runIntegrationTests = Boolean.parseBoolean(System.getenv("RUN_INTEGRATION_TESTS"));
     static boolean useLocalElastic = Boolean.parseBoolean(System.getenv("INTEGRATION_TEST_USE_LOCAL_ELASTIC"));
-
+    
     @BeforeClass
     public static void beforeClass() {
         Assume.assumeTrue("RUN_INTEGRATION_TESTS is false, skipping integration tests", runIntegrationTests);
-    }
-
-    @BeforeEach
-    public void setup() {
-        mvc = MockMvcBuilders
-                .webAppContextSetup(context)
-                .alwaysDo(result -> {
-                    System.out.println("API RESPONSE");
-                    String json = result.getResponse().getContentAsString();
-                    System.out.println(json);
-                })
-                .build();
     }
 
     /**
@@ -78,6 +64,7 @@ public abstract class IntegrationTestBase {
     protected static String elasticImage = "docker.elastic.co/elasticsearch/elasticsearch:8.4.2";
 
     static ElasticsearchContainer ELASTICSEARCH_CONTAINER;
+
     static {
         if (runIntegrationTests) {
             if (!useLocalElastic) {
