@@ -17,6 +17,7 @@ import uk.gov.cslearning.catalogue.repository.CourseRepository;
 import uk.gov.cslearning.catalogue.service.CourseService;
 
 import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
 import java.util.Arrays;
 
 @RestController
@@ -56,7 +57,7 @@ public class CourseControllerV2 {
 
     @PostMapping("/search")
     @ResponseBody
-    public SearchResults searchCourses(@RequestBody CourseSearchParameters params,
+    public SearchResults searchCourses(@Valid @RequestBody CourseSearchParameters params,
                                        @RequestParam(value = "sort.field", required = false) String field,
                                        @RequestParam(value = "sort.direction", required = false) Sort.Direction direction,
                                        Pageable pageable) {

@@ -153,6 +153,13 @@ public class CourseControllerV2Test extends IntegrationTestBase {
                 .andExpect(jsonPath("$.results[1].title").value("Blended course 2"))
                 .andExpect(jsonPath("$.results[2].id").value("Blended course 3"))
                 .andExpect(jsonPath("$.results[2].title").value("Blended course 3"));
+
+        // Invalid character
+        mvc.perform(post("/v2/courses/search?size=3&page=0&sort.field=title&sort.direction=ASC")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"titleStartsWith\": \" b \"}")
+                        .with(csrf()))
+                .andExpect(status().isBadRequest());
     }
 
 }

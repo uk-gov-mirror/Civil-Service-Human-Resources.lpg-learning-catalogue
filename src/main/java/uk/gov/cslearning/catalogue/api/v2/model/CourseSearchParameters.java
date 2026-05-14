@@ -3,6 +3,7 @@ package uk.gov.cslearning.catalogue.api.v2.model;
 import lombok.Data;
 import uk.gov.cslearning.catalogue.domain.Status;
 
+import javax.validation.constraints.Pattern;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +22,7 @@ public class CourseSearchParameters {
     List<String> areasOfWork = Collections.emptyList();
     List<String> interests = Collections.emptyList();
 
+    @Pattern(regexp = "^[a-zA-Z0-9]$")
     String titleStartsWith;
 
     public boolean hasModuleTypes() {
