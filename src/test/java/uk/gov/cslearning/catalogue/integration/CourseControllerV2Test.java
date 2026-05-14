@@ -139,4 +139,27 @@ public class CourseControllerV2Test extends IntegrationTestBase {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    public void testCourseSearchPostStartsWith() throws Exception {
+        mvc.perform(post("/v2/courses/search?size=3&page=0&sort.field=title&sort.direction=ASC")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"titleStartsWith\": \"b\"}")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results.length()").value(3))
+                .andExpect(jsonPath("$.results[0].id").value("Blended course 1"))
+                .andExpect(jsonPath("$.results[0].title").value("Blended course 1"))
+                .andExpect(jsonPath("$.results[1].id").value("Blended course 2"))
+                .andExpect(jsonPath("$.results[1].title").value("Blended course 2"))
+                .andExpect(jsonPath("$.results[2].id").value("Blended course 3"))
+                .andExpect(jsonPath("$.results[2].title").value("Blended course 3"));
+
+        // Invalid character
+        mvc.perform(post("/v2/courses/search?size=3&page=0&sort.field=title&sort.direction=ASC")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"titleStartsWith\": \" b \"}")
+                        .with(csrf()))
+                .andExpect(status().isBadRequest());
+    }
+
 }

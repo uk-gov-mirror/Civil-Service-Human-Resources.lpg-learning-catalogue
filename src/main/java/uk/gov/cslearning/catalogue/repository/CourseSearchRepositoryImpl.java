@@ -77,6 +77,10 @@ public class CourseSearchRepositoryImpl implements CourseSearchRepository {
                     .operator(Operator.AND));
         }
 
+        if (parameters.getTitleStartsWith() != null) {
+            searchQuery.must(new PrefixQueryBuilder("title.keyword", parameters.getTitleStartsWith().trim()).caseInsensitive(true));
+        }
+
         if (parameters.hasModuleTypes()) {
             BoolQueryBuilder typesQuery = getModuleTypeBoolQuery(parameters.getTypes());
             searchQuery.must(typesQuery);
