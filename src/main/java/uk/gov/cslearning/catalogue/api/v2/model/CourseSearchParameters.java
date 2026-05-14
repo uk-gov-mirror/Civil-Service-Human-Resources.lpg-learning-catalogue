@@ -21,15 +21,17 @@ public class CourseSearchParameters {
     List<String> areasOfWork = Collections.emptyList();
     List<String> interests = Collections.emptyList();
 
+    String titleStartsWith;
+
     public boolean hasModuleTypes() {
         return !this.types.isEmpty();
     }
 
-    public boolean hasAudienceFields(){
+    public boolean hasAudienceFields() {
         return !departments.isEmpty() || !areasOfWork.isEmpty() || !interests.isEmpty();
     }
 
-    public boolean costIsFree(){
+    public boolean costIsFree() {
         return this.cost != null && this.cost.equals("free");
     }
 }
