@@ -15,6 +15,8 @@ import uk.gov.cslearning.catalogue.repository.CourseRepository;
 import uk.gov.cslearning.catalogue.service.AuthoritiesService;
 import uk.gov.cslearning.catalogue.service.RegistryService;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/search")
 public class SearchController {
@@ -33,14 +35,14 @@ public class SearchController {
     }
 
     @GetMapping
-    public ResponseEntity<SearchResults> search(CourseSearchParameters parameters, PageParameters pageParameters) {
+    public ResponseEntity<SearchResults> search(@Valid CourseSearchParameters parameters, PageParameters pageParameters) {
         SearchResults results = courseRepository.search(pageParameters.getPageRequest(), parameters);
         return ResponseEntity.ok(results);
     }
 
     @GetMapping("/management/courses")
     public ResponseEntity<SearchResults> searchForOrganisation(
-            Authentication authentication, CourseSearchParameters parameters, PageParameters pageParameters) {
+            Authentication authentication, @Valid CourseSearchParameters parameters, PageParameters pageParameters) {
         OwnerParameters ownerParameters = new OwnerParameters();
         Pageable pageable = pageParameters.getPageRequest();
         if (Utils.hasRoles(new String[]{"CSL_AUTHOR", "LEARNING_MANAGER"})) {
@@ -50,11 +52,7 @@ public class SearchController {
                 CivilServant civilServant = registryService.getCurrentCivilServant();
                 civilServant.getOrganisationalUnitCode().ifPresent(ownerParameters::setOrganisationalUnitCode);
                 return ResponseEntity.ok(courseRepository.search(pageable, parameters, ownerParameters));
-            } else if (Utils.hasRole("PROFESSION_AUTHOR")) {
-                CivilServant civilServant = registryService.getCurrentCivilServant();
-                civilServant.getProfessionId().ifPresent(organisationalUnitCode -> ownerParameters.setProfession(organisationalUnitCode.toString()));
-                return ResponseEntity.ok(courseRepository.search(pageable, parameters, ownerParameters));
-            } else if (Utils.hasRoles(new String[]{"KPMG_SUPPLIER_AUTHOR", "KORNFERRY_SUPPLIER_AUTHOR", "KNOWLEDGEPOOL_SUPPLIER_AUTHOR"})) {
+            } else if (Utils.hasRoles(new String[]{"KPMG_SUPPLIER_AUTHOR"})) {
                 ownerParameters.setSupplier(authoritiesService.getSupplier(authentication));
                 return ResponseEntity.ok(courseRepository.search(pageable, parameters, ownerParameters));
             }

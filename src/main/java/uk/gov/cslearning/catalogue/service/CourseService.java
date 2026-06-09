@@ -1,11 +1,14 @@
 package uk.gov.cslearning.catalogue.service;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import uk.gov.cslearning.catalogue.api.SearchResults;
+import uk.gov.cslearning.catalogue.api.v2.model.CourseIdAudienceAttributeMap;
+import uk.gov.cslearning.catalogue.api.v2.model.CourseSearchParameters;
 import uk.gov.cslearning.catalogue.api.v2.model.RequiredLearningIdMap;
 import uk.gov.cslearning.catalogue.domain.CivilServant.CivilServant;
 import uk.gov.cslearning.catalogue.domain.CivilServant.OrganisationalUnit;
@@ -19,9 +22,11 @@ import uk.gov.cslearning.catalogue.domain.module.Module;
 import uk.gov.cslearning.catalogue.domain.validation.CourseValidator;
 import uk.gov.cslearning.catalogue.exception.CourseCannotByDeletedException;
 import uk.gov.cslearning.catalogue.repository.CourseRepository;
-import uk.gov.cslearning.catalogue.repository.CourseRequiredRepository;
 
-import java.time.*;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Supplier;
@@ -33,8 +38,6 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
 
-    private final CourseRequiredRepository courseRequiredRepository;
-
     private final EventService eventService;
 
     private final RegistryService registryService;
@@ -43,21 +46,16 @@ public class CourseService {
 
     private final AuthoritiesService authoritiesService;
 
-    private final RequiredByService requiredByService;
-
     private final CourseValidator courseValidator;
 
-    public CourseService(CourseRepository courseRepository, CourseRequiredRepository courseRequiredRepository,
+    public CourseService(CourseRepository courseRepository,
                          EventService eventService, RegistryService registryService, OwnerFactory ownerFactory,
-                         AuthoritiesService authoritiesService, RequiredByService requiredByService,
-                         CourseValidator courseValidator) {
+                         AuthoritiesService authoritiesService, CourseValidator courseValidator) {
         this.courseRepository = courseRepository;
-        this.courseRequiredRepository = courseRequiredRepository;
         this.eventService = eventService;
         this.registryService = registryService;
         this.ownerFactory = ownerFactory;
         this.authoritiesService = authoritiesService;
-        this.requiredByService = requiredByService;
         this.courseValidator = courseValidator;
     }
 
@@ -76,7 +74,7 @@ public class CourseService {
         course.setOwner(ownerFactory.create(civilServant, course));
         course.setCreatedTimestamp(LocalDateTime.now(Clock.systemUTC()));
 
-        if(course.getHasBeenPublished() == null){
+        if (course.getHasBeenPublished() == null) {
             course.setHasBeenPublished(course.getStatus().equals(Status.PUBLISHED));
         }
 
@@ -91,7 +89,7 @@ public class CourseService {
     }
 
     public Course updateCourse(Course course, Course newCourse) {
-         courseValidator.validate(course, newCourse);
+        courseValidator.validate(course, newCourse);
         course.setTitle(newCourse.getTitle());
         course.setShortDescription(newCourse.getShortDescription());
         course.setLearningOutcomes(newCourse.getLearningOutcomes());
@@ -103,12 +101,11 @@ public class CourseService {
         course.setUpdatedTimestamp(LocalDateTime.now(Clock.systemUTC()));
         Optional.ofNullable(newCourse.getLearningProvider()).ifPresent(course::setLearningProvider);
 
-        if(newCourse.getHasBeenPublished() == null){
-            if(newCourse.getStatus().equals(Status.PUBLISHED)){
+        if (newCourse.getHasBeenPublished() == null) {
+            if (newCourse.getStatus().equals(Status.PUBLISHED)) {
                 course.setHasBeenPublished(true);
             }
-        }
-        else{
+        } else {
             course.setHasBeenPublished(newCourse.getHasBeenPublished());
         }
 
@@ -153,10 +150,6 @@ public class CourseService {
         return courseRepository.findAllByOrganisationCode(organisationalUnitCode, pageable);
     }
 
-    public Page<Course> findCoursesByProfession(String professionId, Pageable pageable) {
-        return courseRepository.findAllByProfessionId(professionId, pageable);
-    }
-
     public Page<Course> findCoursesBySupplier(Authentication authentication, Pageable pageable) {
         return courseRepository.findAllBySupplier(authoritiesService.getSupplier(authentication), pageable);
     }
@@ -181,46 +174,20 @@ public class CourseService {
         return list;
     }
 
-    public Map<String, List<String>> getOrganisationParentsMap() {
-        return registryService.getOrganisationalUnitParentsMap();
-    }
-
-    public boolean isCourseRequiredWithinRangeForOrg(Course course, List<String> organisationalUnitList, long from, long to) {
-        List<Audience> orgAudiences = course.getAudiences()
-                .stream()
-                .filter(audience -> organisationalUnitList.stream().anyMatch(organisationalUnit -> audience.getDepartments().contains(organisationalUnit)))
-                .collect(Collectors.toList());
-
-        return orgAudiences
-                .stream()
-                .anyMatch(audience -> requiredByService.isAudienceRequiredWithinRange(audience, Instant.now(), from, to));
-    }
-
     public List<Course> fetchMandatoryCoursesByDueDate(Collection<Long> days) {
         LocalDate now = LocalDate.now();
 
         Map<Course, Set<Audience>> alterAudienceList = new HashMap();
 
         courseRepository.findAllPublishedRequiredLearning(DEFAULT_PAGEABLE)
-            .forEach(course -> course.getAudiences()
-                .forEach(audience -> addCourseIfAudienceIsRequired(course, audience, alterAudienceList, days, now)));
+                .forEach(course -> course.getAudiences()
+                        .forEach(audience -> addCourseIfAudienceIsRequired(course, audience, alterAudienceList, days, now)));
 
         for (Course course : alterAudienceList.keySet()) {
             course.setAudiences(alterAudienceList.get(course));
         }
 
         return new ArrayList(alterAudienceList.keySet());
-    }
-
-    public Page<Course> prepareCoursePage(Pageable pageable, List<Course> courses) {
-        Set<String> courseSet = new HashSet<>();
-        List<Course> filteredCourses = courses.stream()
-            .skip(pageable.getPageNumber() * pageable.getPageSize())
-            .limit(pageable.getPageSize())
-            .filter(course -> courseSet.add(course.getId()))
-            .collect(Collectors.toList());
-
-        return new PageImpl<>(filteredCourses, pageable, courses.size());
     }
 
     public Map<String, List<Course>> groupByOrganisationCode(List<Course> courses) {
@@ -249,19 +216,14 @@ public class CourseService {
         return new RequiredLearningIdMap(depCodeToCourseIdsMap);
     }
 
-    public Page<Course> getRequiredCourses(String profession, String gradeCode, List<String>departments, List<String>otherAreasOfWork,  List<String>interests, String courseStatus,  Pageable pageable) {
-        return courseRequiredRepository.findRequired(profession, gradeCode, departments, otherAreasOfWork, interests, courseStatus, pageable);
-    }
-
-    public Course deleteCourseById(String courseId){
+    public Course deleteCourseById(String courseId) {
         Course course = getCourseById(courseId);
         Boolean courseCanBeDeleted = course.getHasBeenPublished() != null && !course.getHasBeenPublished();
 
-        if(courseCanBeDeleted){
+        if (courseCanBeDeleted) {
             courseRepository.delete(course);
             return course;
-        }
-        else{
+        } else {
             throw new CourseCannotByDeletedException();
         }
 
@@ -280,10 +242,10 @@ public class CourseService {
     }
 
     private void addCourseIfAudienceIsRequired(Course course,
-            Audience audience,
-            Map<Course, Set<Audience>> alterAudienceList,
-            Collection<Long> days,
-            LocalDate now) {
+                                               Audience audience,
+                                               Map<Course, Set<Audience>> alterAudienceList,
+                                               Collection<Long> days,
+                                               LocalDate now) {
         if (isAudienceRequired(audience, days, now)) {
             if (alterAudienceList.containsKey(course)) {
                 alterAudienceList.get(course).add(audience);
@@ -297,8 +259,8 @@ public class CourseService {
 
     private boolean isAudienceRequired(Audience audience, Collection<Long> days, LocalDate now) {
         return audience.getRequiredBy() != null
-            && audience.getDepartments() != null
-            && isRequiredDateDue(LocalDateTime.ofInstant(audience.getRequiredBy(), ZoneId.systemDefault()).toLocalDate(), days, now);
+                && audience.getDepartments() != null
+                && isRequiredDateDue(LocalDateTime.ofInstant(audience.getRequiredBy(), ZoneId.systemDefault()).toLocalDate(), days, now);
     }
 
     private boolean isRequiredDateDue(LocalDate requiredBy, Collection<Long> days, LocalDate now) {
@@ -315,5 +277,43 @@ public class CourseService {
         });
 
         return course;
+    }
+
+    public SearchResults search(CourseSearchParameters params, Pageable pageable) {
+        return courseRepository.search(pageable, params);
+    }
+
+    public SearchResults search(CourseSearchParameters params, Pageable pageable, String field, Sort.Direction direction) {
+        if (field != null && direction != null) {
+            return courseRepository.search(pageable, params, field, direction);
+        } else {
+            return this.search(params, pageable);
+        }
+    }
+
+    public CourseIdAudienceAttributeMap getCourseIdAudienceAttributeMap() {
+        List<Course> allCourses = courseRepository.findAll(PageRequest.of(0, 10000)).getContent();
+        Map<String, Set<String>> areaOfWorkMap = new HashMap<>();
+        Map<String, Set<String>> departmentCodeMap = new HashMap<>();
+        Map<String, Set<String>> interestMap = new HashMap<>();
+        allCourses
+                .stream().filter(c -> c.getStatus().equals(Status.PUBLISHED))
+                .forEach(c -> c.getAudiences()
+                        .stream().filter(a -> a.getType() != null && a.getType().equals(Audience.Type.OPEN))
+                        .forEach(a -> {
+                            a.getAreasOfWork().forEach(aow -> areaOfWorkMap.merge(aow, new HashSet<>(Collections.singletonList(c.getId())), (existingIds, newIds) -> {
+                                existingIds.addAll(newIds);
+                                return existingIds;
+                            }));
+                            a.getDepartments().forEach(dep -> departmentCodeMap.merge(dep, new HashSet<>(Collections.singletonList(c.getId())), (existingIds, newIds) -> {
+                                existingIds.addAll(newIds);
+                                return existingIds;
+                            }));
+                            a.getInterests().forEach(interest -> interestMap.merge(interest, new HashSet<>(Collections.singletonList(c.getId())), (existingIds, newIds) -> {
+                                existingIds.addAll(newIds);
+                                return existingIds;
+                            }));
+                        }));
+        return new CourseIdAudienceAttributeMap(areaOfWorkMap, departmentCodeMap, interestMap);
     }
 }
