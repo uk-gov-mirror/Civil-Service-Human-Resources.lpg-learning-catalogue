@@ -22,7 +22,12 @@ import uk.gov.cslearning.catalogue.util.DataService;
 @Import({IntegrationTestConfig.class, DisableBlobStorage.class})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class MySQLIntegrationTestBase {
+public abstract class MySQLIntegrationTestBase {
+
+    /*
+    Mock out the Elasticsearch repositories to prevent the app connecting to ES.
+    The ES tests should be moved to their own package at some point, maybe after the Java upgrade / maven migration
+     */
 
     @MockBean
     private CourseRepository courseRepository;
