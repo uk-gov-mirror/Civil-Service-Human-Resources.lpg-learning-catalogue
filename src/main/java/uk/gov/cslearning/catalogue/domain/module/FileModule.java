@@ -3,7 +3,11 @@ package uk.gov.cslearning.catalogue.domain.module;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @JsonTypeName("file")
 public class FileModule extends Module {
 
@@ -18,27 +22,4 @@ public class FileModule extends Module {
         this.fileSize = fileSize;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public Long getFileSize() {
-        return fileSize;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public void setFileSize(Long fileSize) {
-        this.fileSize = fileSize;
-    }
-
-    public String getMediaId() {
-        return mediaId;
-    }
-
-    public void setMediaId(String mediaId) {
-        this.mediaId = mediaId;
-    }
 }

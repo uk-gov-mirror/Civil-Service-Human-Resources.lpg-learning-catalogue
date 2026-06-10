@@ -1,0 +1,27 @@
+logging:
+  level:
+    root: TRACE
+    com.zaxxer.hikari: TRACE
+spring:
+  flyway:
+    locations: classpath:db/migration/{vendor}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+  datasource:
+    hikari:
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+    driver-class-name: ${DATASOURCE_DRIVER_CLASS_NAME:org.h2.Driver}
+    url: jdbc:h2:mem:learning_catalogue;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password: sa
+  h2:
+    console:
+      enabled: true
+      path: "/h2-console"

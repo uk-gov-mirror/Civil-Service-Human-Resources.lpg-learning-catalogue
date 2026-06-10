@@ -14,7 +14,7 @@ import uk.gov.cslearning.catalogue.dto.ModuleDto;
 import uk.gov.cslearning.catalogue.dto.factory.CourseDtoFactory;
 import uk.gov.cslearning.catalogue.dto.factory.ModuleDtoFactory;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
-import uk.gov.cslearning.catalogue.repository.CourseRepository;
+import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.service.rustici.RusticiEngineService;
 import uk.gov.cslearning.catalogue.service.upload.FileUploadService;
 import uk.gov.cslearning.catalogue.service.upload.FileUploadServiceFactory;

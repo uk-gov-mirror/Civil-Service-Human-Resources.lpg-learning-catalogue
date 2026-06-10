@@ -17,11 +17,9 @@ import java.util.stream.Collectors;
 @Component
 public class EventDtoFactory {
     private final ModuleDtoFactory moduleDtoFactory;
-    private final LearningProviderDtoFactory learningProviderDtoFactory;
 
-    public EventDtoFactory(ModuleDtoFactory moduleDtoFactory, LearningProviderDtoFactory learningProviderDtoFactory) {
+    public EventDtoFactory(ModuleDtoFactory moduleDtoFactory) {
         this.moduleDtoFactory = moduleDtoFactory;
-        this.learningProviderDtoFactory = learningProviderDtoFactory;
     }
 
     public EventDto create(Event event, FaceToFaceModule module, Course course) {
@@ -36,10 +34,6 @@ public class EventDtoFactory {
         Optional.ofNullable(event.getDateRanges())
                 .ifPresent(eventDateRanges ->
                         eventDto.setEventDate(getEventDatesFromDateRanges(event.getDateRanges())));
-
-        Optional.ofNullable(course.getLearningProvider())
-                .ifPresent(learningProvider ->
-                        eventDto.setLearningProvider(learningProviderDtoFactory.create(learningProvider)));
 
         return eventDto;
     }

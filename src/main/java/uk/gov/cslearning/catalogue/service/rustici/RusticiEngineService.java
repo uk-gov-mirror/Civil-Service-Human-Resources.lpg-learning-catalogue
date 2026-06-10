@@ -9,7 +9,7 @@ import uk.gov.cslearning.catalogue.dto.rustici.course.CreateCourse;
 import uk.gov.cslearning.catalogue.dto.rustici.course.CreateCourseResponse;
 import uk.gov.cslearning.catalogue.exception.InvalidScormException;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
-import uk.gov.cslearning.catalogue.repository.MediaRepository;
+import uk.gov.cslearning.catalogue.repository.elastic.MediaRepository;
 
 @Service
 @Slf4j

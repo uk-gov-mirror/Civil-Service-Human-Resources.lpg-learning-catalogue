@@ -31,7 +31,6 @@ import static org.mockito.Mockito.*;
 public class AudienceServiceTest {
     private static final String COURSE_ID = "abc123";
     private static final String ORGANISATIONAL_UNIT_CODE = "code";
-    private static final long PROFESSION_ID = 1L;
     private static final String PROFESSION_NAME = "name";
 
     @Mock

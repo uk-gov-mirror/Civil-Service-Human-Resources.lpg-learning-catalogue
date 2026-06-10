@@ -3,7 +3,11 @@ package uk.gov.cslearning.catalogue.domain.module;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @JsonTypeName("elearning")
 public class ELearningModule extends Module {
 
@@ -20,28 +24,5 @@ public class ELearningModule extends Module {
 
     }
 
-    public String getStartPage() {
-        return startPage;
-    }
-
-    public void setStartPage(String startPage) {
-        this.startPage = startPage;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getMediaId() {
-        return mediaId;
-    }
-
-    public void setMediaId(String mediaId) {
-        this.mediaId = mediaId;
-    }
 }
 

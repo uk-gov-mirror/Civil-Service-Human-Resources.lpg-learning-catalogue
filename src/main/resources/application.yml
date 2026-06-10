@@ -1,10 +1,22 @@
-
+database:
+  host: ${DATABASE_HOST:jdbc:mysql://localhost:3306}
+  name: ${DATABASE_NAME:learning_catalogue}
+  use-ssl: ${DATABASE_USESSL:false}
 spring:
   jackson:
     serialization:
       write_dates_as_timestamps: false
   resources:
     add-mappings: false
+  datasource:
+    url: ${DATASOURCE_URL:${database.host}/${database.name}?useSSL=${database.use-ssl}&requireSSL=false}
+    username: ${DATASOURCE_USERNAME:root}
+    password: ${DATASOURCE_PASSWORD:my-secret-pw}
+    platform: mysql
+    hikari:
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
   servlet:
     multipart:
       max-file-size: 5120MB

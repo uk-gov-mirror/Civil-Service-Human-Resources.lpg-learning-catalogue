@@ -13,7 +13,7 @@ import uk.gov.cslearning.catalogue.domain.module.VideoModule;
 import uk.gov.cslearning.catalogue.dto.ModuleDto;
 import uk.gov.cslearning.catalogue.dto.factory.ModuleDtoFactory;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
-import uk.gov.cslearning.catalogue.repository.CourseRepository;
+import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.service.rustici.RusticiEngineService;
 import uk.gov.cslearning.catalogue.service.upload.FileUploadService;
 import uk.gov.cslearning.catalogue.service.upload.FileUploadServiceFactory;
@@ -123,7 +123,7 @@ public class ModuleService {
                             results.put(m.getId(), moduleDtoFactory.create(m, c))));
             page = page + 1;
             numberOfCourses = courses.getNumberOfElements();
-        } while(numberOfCourses == PAGE_SIZE);
+        } while (numberOfCourses == PAGE_SIZE);
         return results;
     }
 
@@ -138,7 +138,7 @@ public class ModuleService {
                             results.put(m.getId(), moduleDtoFactory.create(m, c))));
             page = page + 1;
             numberOfCourses = courses.getNumberOfElements();
-        } while(numberOfCourses == PAGE_SIZE);
+        } while (numberOfCourses == PAGE_SIZE);
 
         return results;
     }

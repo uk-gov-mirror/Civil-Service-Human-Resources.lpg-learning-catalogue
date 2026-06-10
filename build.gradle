@@ -38,6 +38,14 @@ dependencies {
     implementation 'org.springframework.security.oauth:spring-security-oauth2:2.3.3.RELEASE'
     implementation group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.1.1.RELEASE'
 
+
+    implementation 'org.springframework.data:spring-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.0.2.RELEASE'
+    implementation 'com.mysql:mysql-connector-j:8.3.0'
+    implementation 'org.flywaydb:flyway-mysql:10.1.0'
+    implementation 'org.hibernate:hibernate-core:5.2.16.Final'
+    implementation 'org.hibernate:hibernate-entitymanager:5.2.16.Final'
+
     compile('org.springframework.data:spring-data-elasticsearch') {
         exclude module: 'log4j-api'
     }
@@ -61,6 +69,7 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    testImplementation 'com.h2database:h2:1.4.197'
     testImplementation 'com.google.code.gson:gson:2.8.2'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.4'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

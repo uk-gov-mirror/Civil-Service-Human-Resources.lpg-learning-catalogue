@@ -1,5 +1,7 @@
 package uk.gov.cslearning.catalogue.domain.module;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -10,6 +12,8 @@ import java.time.LocalTime;
 
 import static org.springframework.data.elasticsearch.annotations.FieldType.Date;
 
+@Setter
+@Getter
 public class DateRange {
 
     @NotNull
@@ -30,30 +34,6 @@ public class DateRange {
     public DateRange(@NotNull LocalDate date, @NotNull LocalTime startTime, @NotNull LocalTime endTime) {
         this.date = date;
         this.startTime = startTime;
-        this.endTime = endTime;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
     }
 
