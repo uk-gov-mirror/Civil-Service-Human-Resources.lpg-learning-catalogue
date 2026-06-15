@@ -1,12 +1,12 @@
 CREATE TABLE learning_tag
 (
     id                 BIGINT AUTO_INCREMENT,
-    name               VARCHAR(30)  NOT NULL,
-    description        VARCHAR(255) NOT NULL,
-    code               VARCHAR(10)  NOT NULL,
-    url_slug           VARCHAR(30)  NOT NULL,
-    is_category           BOOLEAN DEFAULT FALSE NOT NULL,
-    is_archived           BOOLEAN DEFAULT FALSE NOT NULL,
+    name               VARCHAR(50)             NOT NULL,
+    description        VARCHAR(255),
+    code               VARCHAR(10)             NOT NULL,
+    url_slug           VARCHAR(50)             NOT NULL,
+    is_category        BOOLEAN   DEFAULT FALSE NOT NULL,
+    is_archived        BOOLEAN   DEFAULT FALSE NOT NULL,
     parent_id          BIGINT,
     created_timestamp  TIMESTAMP DEFAULT NOW() NOT NULL,
     updated_timestamp  TIMESTAMP DEFAULT NOW() NOT NULL,
