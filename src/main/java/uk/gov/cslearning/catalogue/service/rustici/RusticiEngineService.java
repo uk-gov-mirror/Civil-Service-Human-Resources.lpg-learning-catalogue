@@ -28,7 +28,7 @@ public class RusticiEngineService {
     }
 
     public void uploadElearningModule(String courseId, String moduleId, String mediaId) {
-        Media media = mediaRepository.findById(mediaId).orElseThrow(ResourceNotFoundException::resourceNotFoundException);
+        Media media = mediaRepository.findById(mediaId).orElseThrow(ResourceNotFoundException::new);
         String manifestFile = media.getMetadataWithCustomKey(CustomMediaMetadata.ELEARNING_MANIFEST);
         if (manifestFile == null) {
             throw new InvalidScormException(String.format("ELearning media with ID %s does now have a valid manifest metadata tag", mediaId));

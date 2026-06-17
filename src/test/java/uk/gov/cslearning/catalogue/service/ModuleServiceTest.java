@@ -25,7 +25,8 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -115,7 +116,7 @@ public class ModuleServiceTest {
         newModule.setTitle(updatedTitle);
         when(courseService.getCourseById(courseId)).thenReturn(course);
         moduleService.updateModule(courseId, newModule);
-        assertEquals(course.getModuleById(moduleId).orElseThrow(ResourceNotFoundException::resourceNotFoundException).getTitle(), updatedTitle);
+        assertEquals(course.getModuleById(moduleId).orElseThrow(ResourceNotFoundException::new).getTitle(), updatedTitle);
     }
 
     @Test

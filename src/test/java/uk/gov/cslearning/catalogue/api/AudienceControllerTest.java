@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cslearning.catalogue.domain.Course;
 import uk.gov.cslearning.catalogue.domain.module.Audience;
+import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
 import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.service.AudienceService;
 import uk.gov.cslearning.catalogue.service.CourseService;
@@ -31,11 +32,12 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static uk.gov.cslearning.catalogue.exception.ResourceNotFoundException.resourceNotFoundException;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -127,7 +129,7 @@ public class AudienceControllerTest {
         Audience audience = new Audience();
         when(audienceService.setDefaults(any(), any())).thenReturn(audience);
 
-        doThrow(resourceNotFoundException()).when(audienceService).save(courseId, audience);
+        doThrow(new ResourceNotFoundException()).when(audienceService).save(courseId, audience);
 
         mockMvc.perform(
                         get(String.format("/courses/%s/audiences/%s", courseId, audienceId)).with(csrf())

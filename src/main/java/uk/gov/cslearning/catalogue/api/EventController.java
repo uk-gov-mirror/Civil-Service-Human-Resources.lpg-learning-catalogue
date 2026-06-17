@@ -68,7 +68,7 @@ public class EventController {
 
         return result.map(course -> {
             Module module = course.getModuleById(moduleId)
-                    .orElseThrow(ResourceNotFoundException::resourceNotFoundException);
+                    .orElseThrow(ResourceNotFoundException::new);
 
             if (module instanceof FaceToFaceModule) {
                 FaceToFaceModule faceToFaceModule = (FaceToFaceModule) module;
@@ -104,7 +104,7 @@ public class EventController {
         Optional<Course> result = courseRepository.findById(courseId);
 
         return result.map(course -> {
-            Module module = course.getModuleById(moduleId).orElseThrow(ResourceNotFoundException::resourceNotFoundException);
+            Module module = course.getModuleById(moduleId).orElseThrow(ResourceNotFoundException::new);
 
             if (module instanceof FaceToFaceModule) {
                 FaceToFaceModule faceToFaceModule = (FaceToFaceModule) module;

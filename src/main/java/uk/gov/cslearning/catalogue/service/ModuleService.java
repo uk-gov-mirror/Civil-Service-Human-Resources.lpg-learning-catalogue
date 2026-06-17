@@ -73,7 +73,7 @@ public class ModuleService {
 
     public void deleteModule(String courseId, String moduleId) {
         Course course = courseService.getCourseById(courseId);
-        Module module = course.getModuleById(moduleId).orElseThrow(ResourceNotFoundException::resourceNotFoundException);
+        Module module = course.getModuleById(moduleId).orElseThrow(ResourceNotFoundException::new);
 
         new Thread(() -> deleteFile(courseId, module)).start();
 

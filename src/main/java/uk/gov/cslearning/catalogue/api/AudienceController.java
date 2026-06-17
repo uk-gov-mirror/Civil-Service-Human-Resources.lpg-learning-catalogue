@@ -87,9 +87,9 @@ public class AudienceController {
                             course.deleteAudience(audience);
                             return courseRepository.save(course);
                         })
-                        .orElseThrow(ResourceNotFoundException::resourceNotFoundException)
+                        .orElseThrow(ResourceNotFoundException::new)
                 )
-                .orElseThrow(ResourceNotFoundException::resourceNotFoundException);
+                .orElseThrow(ResourceNotFoundException::new);
 
         return ResponseEntity.noContent().build();
     }

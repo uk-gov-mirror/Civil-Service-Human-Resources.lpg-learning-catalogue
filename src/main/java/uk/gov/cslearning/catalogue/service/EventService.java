@@ -41,7 +41,7 @@ public class EventService {
         Course course = getCourseById(courseId);
 
         FaceToFaceModule module = (FaceToFaceModule) course.getModuleById(moduleId)
-                .orElseThrow(ResourceNotFoundException::resourceNotFoundException);
+                .orElseThrow(ResourceNotFoundException::new);
 
         if (module == null) {
             throw new IllegalStateException(
@@ -69,7 +69,7 @@ public class EventService {
         Course course = getCourseById(courseId);
 
         FaceToFaceModule module = (FaceToFaceModule) course.getModuleById(moduleId)
-                .orElseThrow(ResourceNotFoundException::resourceNotFoundException);
+                .orElseThrow(ResourceNotFoundException::new);
 
         if (module == null) {
             throw new IllegalStateException(

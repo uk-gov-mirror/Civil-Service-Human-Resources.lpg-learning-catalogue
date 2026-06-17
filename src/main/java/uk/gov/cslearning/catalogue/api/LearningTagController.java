@@ -8,6 +8,8 @@ import uk.gov.cslearning.catalogue.api.models.SimplePage;
 import uk.gov.cslearning.catalogue.domain.LearningTagDto;
 import uk.gov.cslearning.catalogue.service.LearningTagService;
 
+import javax.validation.Valid;
+
 @Slf4j
 @RestController
 @RequestMapping("/learning-tags")
@@ -24,6 +26,13 @@ public class LearningTagController {
     @ResponseStatus(HttpStatus.OK)
     public SimplePage<LearningTagDto> getTags(PageableParams pageable) {
         return learningTagService.getLearningTags(pageable.getAsPageable());
+    }
+
+    @PostMapping
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CREATED)
+    public LearningTagDto createTag(@Valid @RequestBody LearningTagDto learningTag) {
+        return learningTagService.createLearningTag(learningTag);
     }
 
 }

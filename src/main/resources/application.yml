@@ -23,7 +23,8 @@ spring:
     multipart:
       max-file-size: 5120MB
       max-request-size: 5120MB
-
+time:
+  zoneId: ${TIME_ZONE_ID:UTC}
 server:
   port: 9001
 
@@ -86,8 +87,6 @@ record:
 registry:
   serviceUrl: ${REGISTRY_SERVICE_URL:http://localhost:9002}
   getCurrentUrl: "${registry.serviceUrl}/civilServants/me"
-  getOrganisationalUnit: "${registry.serviceUrl}/organisationalUnits/parent/%s"
-  getAllCodes: "${registry.serviceUrl}/organisationalUnits/allCodesMap"
 
 oauth:
   serviceUrl: ${OAUTH_SERVICE_URL:http://localhost:8080}
