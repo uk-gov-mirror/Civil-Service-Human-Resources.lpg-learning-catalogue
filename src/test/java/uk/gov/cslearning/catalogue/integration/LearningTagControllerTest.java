@@ -2,6 +2,7 @@ package uk.gov.cslearning.catalogue.integration;
 
 import org.junit.Test;
 import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -60,16 +61,17 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     }
 
     @Test
+    @Transactional
     public void testCreateLearningTag() throws Exception {
 
         mvc.perform(post("/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":  \"test tag 01\", \"urlSlug\":  \"tt01\", \"code\":  \"TT01\", \"isCategoryTag\":  false, \"isArchived\":  false}"))
+                        .content("{\"name\":  \"test tag 01\", \"urlSlug\":  \"tt01\", \"code\":  \"TT01\", \"categoryTag\":  false}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("test tag 01"))
                 .andExpect(jsonPath("$.description").isEmpty())
                 .andExpect(jsonPath("$.code").value("TT01"))
-                .andExpect(jsonPath("$.urlSlug").value("test-tag-01"))
+                .andExpect(jsonPath("$.urlSlug").value("tt01"))
                 .andExpect(jsonPath("$.parentId").isEmpty())
                 .andExpect(jsonPath("$.parentName").isEmpty())
                 .andExpect(jsonPath("$.createdTimestamp").value("2025-01-01T10:00:00"))
@@ -79,21 +81,22 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     }
 
     @Test
+    @Transactional
     public void testCreateLearningTagWithParent() throws Exception {
 
         mvc.perform(post("/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":  \"test & tag 02\", \"urlSlug\":  \"tt01\", \"code\":  \"TT02\", \"parentId\": 1, \"isCategoryTag\":  true, \"isArchived\":  true}"))
+                        .content("{\"name\":  \"test & tag 02\", \"urlSlug\":  \"tt02\", \"code\":  \"TT02\", \"parentId\": 1, \"categoryTag\":  true}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("test & tag 02"))
                 .andExpect(jsonPath("$.description").isEmpty())
                 .andExpect(jsonPath("$.code").value("TT02"))
-                .andExpect(jsonPath("$.urlSlug").value("test-and-tag-02"))
+                .andExpect(jsonPath("$.urlSlug").value("tt02"))
                 .andExpect(jsonPath("$.parentId").value(1))
                 .andExpect(jsonPath("$.parentName").value("Project management"))
                 .andExpect(jsonPath("$.createdTimestamp").value("2025-01-01T10:00:00"))
                 .andExpect(jsonPath("$.updatedTimestamp").value("2025-01-01T10:00:00"))
-                .andExpect(jsonPath("$.archived").value(true))
+                .andExpect(jsonPath("$.archived").value(false))
                 .andExpect(jsonPath("$.categoryTag").value(true));
     }
 
@@ -102,7 +105,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
         mvc.perform(post("/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":  \"test & tag 02\", \"urlSlug\":  \"&£$^\", \"code\":  \"TT02\", \"parentId\": 1, \"isCategoryTag\":  true, \"isArchived\":  true}"))
+                        .content("{\"name\":  \"test & tag 02\", \"urlSlug\":  \"&£$^\", \"code\":  \"TT02\", \"parentId\": 1, \"isCategoryTag\":  true}"))
                 .andExpect(status().isBadRequest());
     }
 }
