@@ -64,7 +64,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
         mvc.perform(post("/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":  \"test tag 01\", \"code\":  \"TT01\", \"isCategoryTag\":  false, \"isArchived\":  false}"))
+                        .content("{\"name\":  \"test tag 01\", \"urlSlug\":  \"tt01\", \"code\":  \"TT01\", \"isCategoryTag\":  false, \"isArchived\":  false}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("test tag 01"))
                 .andExpect(jsonPath("$.description").isEmpty())
@@ -83,7 +83,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
         mvc.perform(post("/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":  \"test & tag 02\", \"code\":  \"TT02\", \"parentId\": 1, \"isCategoryTag\":  true, \"isArchived\":  true}"))
+                        .content("{\"name\":  \"test & tag 02\", \"urlSlug\":  \"tt01\", \"code\":  \"TT02\", \"parentId\": 1, \"isCategoryTag\":  true, \"isArchived\":  true}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("test & tag 02"))
                 .andExpect(jsonPath("$.description").isEmpty())
@@ -95,5 +95,14 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.updatedTimestamp").value("2025-01-01T10:00:00"))
                 .andExpect(jsonPath("$.archived").value(true))
                 .andExpect(jsonPath("$.categoryTag").value(true));
+    }
+
+    @Test
+    public void testCreateLearningTagWithInvalidSlug() throws Exception {
+
+        mvc.perform(post("/learning-tags")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":  \"test & tag 02\", \"urlSlug\":  \"&£$^\", \"code\":  \"TT02\", \"parentId\": 1, \"isCategoryTag\":  true, \"isArchived\":  true}"))
+                .andExpect(status().isBadRequest());
     }
 }

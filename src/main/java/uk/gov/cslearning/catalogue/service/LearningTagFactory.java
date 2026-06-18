@@ -28,10 +28,9 @@ public class LearningTagFactory {
     }
 
     public LearningTag create(LearningTagDto learningTagDto) {
-        String urlSlug = utilService.generateUrlSlugFromString(learningTagDto.getName());
         LocalDateTime now = utilService.getNowDateTime();
         return new LearningTag(learningTagDto.getName(), learningTagDto.getDescription(), learningTagDto.getCode(),
-                urlSlug, learningTagDto.isCategoryTag(), learningTagDto.isArchived(), null, now, now);
+                learningTagDto.getUrlSlug(), learningTagDto.isCategoryTag(), learningTagDto.isArchived(), null, now, now);
     }
 
     public LearningTag create(LearningTagDto learningTagDto, LearningTag parent) {

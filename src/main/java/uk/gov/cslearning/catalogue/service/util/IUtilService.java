@@ -5,6 +5,5 @@ import java.time.LocalDateTime;
 public interface IUtilService {
 
     LocalDateTime getNowDateTime();
-
-    String generateUrlSlugFromString(String name);
+    
 }

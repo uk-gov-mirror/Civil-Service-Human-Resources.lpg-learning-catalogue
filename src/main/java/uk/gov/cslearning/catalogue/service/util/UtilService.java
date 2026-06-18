@@ -16,13 +16,5 @@ public class UtilService implements IUtilService {
     public LocalDateTime getNowDateTime() {
         return LocalDateTime.now(clock);
     }
-
-    @Override
-    public String generateUrlSlugFromString(String string) {
-        return string
-                .toLowerCase()
-                .replaceAll("'", "")
-                .replaceAll("&", "and")
-                .replaceAll(" ", "-");
-    }
+    
 }
