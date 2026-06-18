@@ -31,8 +31,7 @@ public class LearningTagDto {
     private String urlSlug;
     @NotNull
     private boolean isCategoryTag;
-    @NotNull
-    private boolean isArchived;
+    private boolean isArchived = false;
     private Long parentId;
     private String parentName;
     private LocalDateTime createdTimestamp;
