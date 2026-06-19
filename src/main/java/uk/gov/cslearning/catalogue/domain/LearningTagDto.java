@@ -20,7 +20,7 @@ public class LearningTagDto {
     @NotNull
     @Size(min = 1, max = 50)
     private String name;
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     private String description;
     @NotNull
     @Size(min = 1, max = 50)
