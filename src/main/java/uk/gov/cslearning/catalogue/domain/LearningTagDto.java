@@ -30,7 +30,7 @@ public class LearningTagDto {
     @Slug
     private String urlSlug;
     @NotNull
-    private boolean isCategoryTag;
+    private boolean isCategory;
     private boolean isArchived = false;
     private Long parentId;
     private String parentName;

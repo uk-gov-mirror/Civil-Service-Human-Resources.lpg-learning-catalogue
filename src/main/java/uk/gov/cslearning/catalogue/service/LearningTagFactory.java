@@ -30,7 +30,7 @@ public class LearningTagFactory {
     public LearningTag create(LearningTagDto learningTagDto) {
         LocalDateTime now = utilService.getNowDateTime();
         return new LearningTag(learningTagDto.getName(), learningTagDto.getDescription(), learningTagDto.getCode(),
-                learningTagDto.getUrlSlug(), learningTagDto.isCategoryTag(), learningTagDto.isArchived(), null, now, now);
+                learningTagDto.getUrlSlug(), learningTagDto.isCategory(), learningTagDto.isArchived(), null, now, now);
     }
 
     public LearningTag create(LearningTagDto learningTagDto, LearningTag parent) {

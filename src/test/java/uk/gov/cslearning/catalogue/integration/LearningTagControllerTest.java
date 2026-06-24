@@ -25,7 +25,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.content[0].parentId").isEmpty())
                 .andExpect(jsonPath("$.content[0].parentName").isEmpty())
                 .andExpect(jsonPath("$.content[0].archived").value(false))
-                .andExpect(jsonPath("$.content[0].categoryTag").value(true))
+                .andExpect(jsonPath("$.content[0].category").value(true))
                 .andExpect(jsonPath("$.content[1].name").value("Tech"))
                 .andExpect(jsonPath("$.content[1].description").value("Technical skills"))
                 .andExpect(jsonPath("$.content[1].code").value("TECH"))
@@ -33,7 +33,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.content[1].parentId").isEmpty())
                 .andExpect(jsonPath("$.content[1].parentName").isEmpty())
                 .andExpect(jsonPath("$.content[1].archived").value(false))
-                .andExpect(jsonPath("$.content[1].categoryTag").value(true))
+                .andExpect(jsonPath("$.content[1].category").value(true))
                 .andExpect(jsonPath("$.content[2].name").value("Agile"))
                 .andExpect(jsonPath("$.content[2].description").value("Agile"))
                 .andExpect(jsonPath("$.content[2].code").value("AGILE"))
@@ -41,7 +41,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.content[2].parentId").value(1))
                 .andExpect(jsonPath("$.content[2].parentName").value("Project management"))
                 .andExpect(jsonPath("$.content[2].archived").value(false))
-                .andExpect(jsonPath("$.content[2].categoryTag").value(true))
+                .andExpect(jsonPath("$.content[2].category").value(true))
                 .andExpect(jsonPath("$.content[3].name").value("Software Development"))
                 .andExpect(jsonPath("$.content[3].description").value("Designing and writing code "))
                 .andExpect(jsonPath("$.content[3].code").value("SOFTDEV"))
@@ -49,7 +49,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.content[3].parentId").value(2))
                 .andExpect(jsonPath("$.content[3].parentName").value("Tech"))
                 .andExpect(jsonPath("$.content[3].archived").value(false))
-                .andExpect(jsonPath("$.content[3].categoryTag").value(true))
+                .andExpect(jsonPath("$.content[3].category").value(true))
                 .andExpect(jsonPath("$.content[4].name").value("Devops"))
                 .andExpect(jsonPath("$.content[4].description").value("Managing and deploying infrastructure"))
                 .andExpect(jsonPath("$.content[4].code").value("DEVOPS"))
@@ -57,7 +57,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.content[4].parentId").value(2))
                 .andExpect(jsonPath("$.content[4].parentName").value("Tech"))
                 .andExpect(jsonPath("$.content[4].archived").value(false))
-                .andExpect(jsonPath("$.content[4].categoryTag").value(true));
+                .andExpect(jsonPath("$.content[4].category").value(true));
     }
 
     @Test
@@ -66,7 +66,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
         mvc.perform(post("/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":  \"test tag 01\", \"urlSlug\":  \"tt01\", \"code\":  \"TT01\", \"categoryTag\":  false}"))
+                        .content("{\"name\":  \"test tag 01\", \"urlSlug\":  \"tt01\", \"code\":  \"TT01\", \"category\":  false}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("test tag 01"))
                 .andExpect(jsonPath("$.description").isEmpty())
@@ -77,7 +77,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.createdTimestamp").value("2025-01-01T10:00:00"))
                 .andExpect(jsonPath("$.updatedTimestamp").value("2025-01-01T10:00:00"))
                 .andExpect(jsonPath("$.archived").value(false))
-                .andExpect(jsonPath("$.categoryTag").value(false));
+                .andExpect(jsonPath("$.category").value(false));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
         mvc.perform(post("/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":  \"test & tag 02\", \"urlSlug\":  \"tt02\", \"code\":  \"TT02\", \"parentId\": 1, \"categoryTag\":  true}"))
+                        .content("{\"name\":  \"test & tag 02\", \"urlSlug\":  \"tt02\", \"code\":  \"TT02\", \"parentId\": 1, \"category\":  true}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("test & tag 02"))
                 .andExpect(jsonPath("$.description").isEmpty())
@@ -97,7 +97,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.createdTimestamp").value("2025-01-01T10:00:00"))
                 .andExpect(jsonPath("$.updatedTimestamp").value("2025-01-01T10:00:00"))
                 .andExpect(jsonPath("$.archived").value(false))
-                .andExpect(jsonPath("$.categoryTag").value(true));
+                .andExpect(jsonPath("$.category").value(true));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
         mvc.perform(post("/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":  \"test & tag 02\", \"urlSlug\":  \"&£$^\", \"code\":  \"TT02\", \"parentId\": 1, \"isCategoryTag\":  true}"))
+                        .content("{\"name\":  \"test & tag 02\", \"urlSlug\":  \"&£$^\", \"code\":  \"TT02\", \"parentId\": 1, \"category\":  true}"))
                 .andExpect(status().isBadRequest());
     }
 }
