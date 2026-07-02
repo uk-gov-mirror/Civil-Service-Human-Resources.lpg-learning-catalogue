@@ -43,12 +43,15 @@ public class LearningTagService {
 
     public LearningTagDto updateLearningTag(Long learningTagId, @Valid LearningTagDto learningTagDto) {
         LearningTag tag = learningTagRepository.findById(learningTagId)
-                .map(learningTag -> Optional.ofNullable(learningTagDto.getParentId())
-                        .map(parentId -> {
-                            LearningTag parent = learningTagRepository.findById(learningTagDto.getParentId())
-                                    .orElseThrow(() -> new ResourceNotFoundException(String.format("Parent learning tag with ID %s not found", learningTagDto.getParentId())));
-                            return learningTagFactory.update(learningTag, learningTagDto, parent);
-                        }).orElse(learningTagFactory.update(learningTag, learningTagDto)))
+                .map(learningTag -> {
+                    if (learningTagDto.getParentId() == null) {
+                        return learningTagFactory.update(learningTag, learningTagDto);
+                    } else {
+                        LearningTag parent = learningTagRepository.findById(learningTagDto.getParentId())
+                                .orElseThrow(() -> new ResourceNotFoundException(String.format("Parent learning tag with ID %s not found", learningTagDto.getParentId())));
+                        return learningTagFactory.update(learningTag, learningTagDto, parent);
+                    }
+                })
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Learning tag with ID %s not found", learningTagId)));
         learningTagRepository.save(tag);
         return learningTagFactory.createDto(tag);
