@@ -5,8 +5,7 @@ import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -107,5 +106,62 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":  \"test & tag 02\", \"urlSlug\":  \"&£$^\", \"code\":  \"TT02\", \"parentId\": 1, \"category\":  true}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Transactional
+    public void testUpdateLearningTag() throws Exception {
+
+        mvc.perform(put("/learning-tags/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":  \"test tag 01 edit\", \"urlSlug\":  \"tt01-edit\", \"code\":  \"TT01E\", \"category\":  true}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("test tag 01 edit"))
+                .andExpect(jsonPath("$.description").isEmpty())
+                .andExpect(jsonPath("$.code").value("TT01E"))
+                .andExpect(jsonPath("$.urlSlug").value("tt01-edit"))
+                .andExpect(jsonPath("$.parentId").isEmpty())
+                .andExpect(jsonPath("$.parentName").isEmpty())
+                .andExpect(jsonPath("$.updatedTimestamp").value("2025-01-01T10:00:00"))
+                .andExpect(jsonPath("$.archived").value(false))
+                .andExpect(jsonPath("$.category").value(true));
+    }
+
+    @Test
+    @Transactional
+    public void testUpdateLearningTagWithParent() throws Exception {
+
+        mvc.perform(put("/learning-tags/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":  \"test tag 01 edit\", \"urlSlug\":  \"tt01-edit\", \"code\":  \"TT01E\", \"category\":  true, \"parentId\":  2}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("test tag 01 edit"))
+                .andExpect(jsonPath("$.description").isEmpty())
+                .andExpect(jsonPath("$.code").value("TT01E"))
+                .andExpect(jsonPath("$.urlSlug").value("tt01-edit"))
+                .andExpect(jsonPath("$.parentId").value(2))
+                .andExpect(jsonPath("$.parentName").value("Tech"))
+                .andExpect(jsonPath("$.updatedTimestamp").value("2025-01-01T10:00:00"))
+                .andExpect(jsonPath("$.archived").value(false))
+                .andExpect(jsonPath("$.category").value(true));
+    }
+
+    @Test
+    @Transactional
+    public void testUpdateLearningTagUnsetParent() throws Exception {
+
+        mvc.perform(put("/learning-tags/3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":  \"Agile\", \"urlSlug\":  \"agile\", \"code\":  \"AGILE\", \"category\":  true, \"parentId\":  null}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Agile"))
+                .andExpect(jsonPath("$.description").isEmpty())
+                .andExpect(jsonPath("$.code").value("AGILE"))
+                .andExpect(jsonPath("$.urlSlug").value("agile"))
+                .andExpect(jsonPath("$.parentId").isEmpty())
+                .andExpect(jsonPath("$.parentName").isEmpty())
+                .andExpect(jsonPath("$.updatedTimestamp").value("2025-01-01T10:00:00"))
+                .andExpect(jsonPath("$.archived").value(false))
+                .andExpect(jsonPath("$.category").value(true));
     }
 }

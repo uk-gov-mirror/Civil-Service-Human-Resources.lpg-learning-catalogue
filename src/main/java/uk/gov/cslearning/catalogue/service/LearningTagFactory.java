@@ -38,4 +38,22 @@ public class LearningTagFactory {
         learningTag.setParent(parent);
         return learningTag;
     }
+
+    public LearningTag update(LearningTag learningTag, LearningTagDto learningTagDto) {
+        learningTag.setDescription(learningTagDto.getDescription());
+        learningTag.setName(learningTagDto.getName());
+        learningTag.setCode(learningTagDto.getCode());
+        learningTag.setUrlSlug(learningTagDto.getUrlSlug());
+        learningTag.setCategory(learningTagDto.isCategory());
+        learningTag.setArchived(learningTagDto.isArchived());
+        learningTag.setParent(null);
+        learningTag.setUpdatedTimestamp(utilService.getNowDateTime());
+        return learningTag;
+    }
+
+    public LearningTag update(LearningTag learningTag, LearningTagDto learningTagDto, LearningTag parent) {
+        learningTag = update(learningTag, learningTagDto);
+        learningTag.setParent(parent);
+        return learningTag;
+    }
 }

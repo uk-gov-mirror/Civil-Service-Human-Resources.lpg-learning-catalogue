@@ -35,4 +35,11 @@ public class LearningTagController {
         return learningTagService.createLearningTag(learningTag);
     }
 
+    @PutMapping("/{learningTagId}")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CREATED)
+    public LearningTagDto updateTag(@PathVariable Long learningTagId, @Valid @RequestBody LearningTagDto learningTag) {
+        return learningTagService.updateLearningTag(learningTagId, learningTag);
+    }
+
 }
