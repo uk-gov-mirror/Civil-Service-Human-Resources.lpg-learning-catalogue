@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cslearning.catalogue.domain.Course;
 import uk.gov.cslearning.catalogue.domain.module.Audience;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
-import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.service.AudienceService;
 import uk.gov.cslearning.catalogue.service.CourseService;
 
@@ -51,10 +50,8 @@ public class AudienceControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private CourseRepository courseRepository;
-
-    @MockBean
     private CourseService courseService;
+
     @MockBean
     private AudienceService audienceService;
 
@@ -96,7 +93,7 @@ public class AudienceControllerTest {
         Audience audience = new Audience();
         audience.setId(audienceId);
 
-        when(courseRepository.existsById(courseId)).thenReturn(true);
+        when(courseService.existsById(courseId)).thenReturn(true);
         when(audienceService.find(courseId, audienceId)).thenReturn(Optional.of(audience));
 
         mockMvc.perform(
@@ -111,7 +108,7 @@ public class AudienceControllerTest {
         String courseId = "course-id";
         String audienceId = "audience-id";
 
-        when(courseRepository.existsById(courseId)).thenReturn(true);
+        when(courseService.existsById(courseId)).thenReturn(true);
         when(audienceService.find(courseId, audienceId)).thenReturn(Optional.empty());
 
         mockMvc.perform(
@@ -145,10 +142,10 @@ public class AudienceControllerTest {
         audiences.add(audience);
         course.setAudiences(audiences);
 
-        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+        when(courseService.findById(course.getId())).thenReturn(Optional.of(course));
         when(audienceService.find(course, audience.getId())).thenReturn(Optional.of(audience));
         when(audienceService.isPermitted(any(), any())).thenReturn(true);
-        when(courseRepository.save(course)).thenReturn(course);
+        when(courseService.save(course)).thenReturn(course);
 
         assertThat(course.getAudiences().isEmpty(), is(not(true)));
 

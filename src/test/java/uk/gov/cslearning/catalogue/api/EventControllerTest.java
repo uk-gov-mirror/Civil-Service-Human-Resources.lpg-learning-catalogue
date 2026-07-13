@@ -18,7 +18,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cslearning.catalogue.domain.Course;
 import uk.gov.cslearning.catalogue.domain.module.*;
-import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
+import uk.gov.cslearning.catalogue.service.CourseService;
 import uk.gov.cslearning.catalogue.service.EventService;
 
 import java.time.LocalDate;
@@ -46,7 +46,7 @@ public class EventControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private CourseRepository courseRepository;
+    private CourseService courseService;
 
     @MockBean
     private EventService eventService;
@@ -70,7 +70,7 @@ public class EventControllerTest {
         String courseId = "course-id";
         String moduleId = "module-id";
 
-        when(courseRepository.existsById(courseId)).thenReturn(true);
+        when(courseService.existsById(courseId)).thenReturn(true);
 
         when(eventService.save(eq(courseId), eq(moduleId), any(Event.class))).thenReturn(event);
 
@@ -90,7 +90,7 @@ public class EventControllerTest {
 
         Event event = new Event();
 
-        when(courseRepository.existsById(courseId)).thenReturn(true);
+        when(courseService.existsById(courseId)).thenReturn(true);
         when(eventService.find(courseId, moduleId, eventId)).thenReturn(Optional.of(event));
 
         mockMvc.perform(
@@ -154,12 +154,12 @@ public class EventControllerTest {
         modules.add(module);
         course.setModules(modules);
 
-        when(courseRepository.existsById(course.getId())).thenReturn(true);
+        when(courseService.existsById(course.getId())).thenReturn(true);
 
         Optional<Course> result = Optional.of(course);
-        when(courseRepository.findById(course.getId())).thenReturn(result);
+        when(courseService.findById(course.getId())).thenReturn(result);
 
-        when(courseRepository.save(course)).thenReturn(course);
+        when(courseService.save(course)).thenReturn(course);
 
         mockMvc.perform(
                         put(String.format("/courses/%s/modules/%s/events/%s", course.getId(), module.getId(), oldEvent.getId())).with(csrf())
@@ -192,12 +192,12 @@ public class EventControllerTest {
         modules.add(module);
         course.setModules(modules);
 
-        when(courseRepository.existsById(course.getId())).thenReturn(true);
+        when(courseService.existsById(course.getId())).thenReturn(true);
 
         Optional<Course> result = Optional.of(course);
-        when(courseRepository.findById(course.getId())).thenReturn(result);
+        when(courseService.findById(course.getId())).thenReturn(result);
 
-        when(courseRepository.save(course)).thenReturn(course);
+        when(courseService.save(course)).thenReturn(course);
 
         mockMvc.perform(
                         delete(String.format("/courses/%s/modules/%s/events/%s", course.getId(), module.getId(), event.getId())).with(csrf()))
