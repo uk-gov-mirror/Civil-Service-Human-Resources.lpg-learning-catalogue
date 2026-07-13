@@ -97,7 +97,7 @@ public class CourseService {
         course.setDescription(newCourse.getDescription());
         course.setTopicId(newCourse.getTopicId());
         course.setUpdatedTimestamp(LocalDateTime.now(Clock.systemUTC()));
-        
+
         if (newCourse.getHasBeenPublished() == null) {
             if (newCourse.getStatus().equals(Status.PUBLISHED)) {
                 course.setHasBeenPublished(true);
@@ -296,5 +296,17 @@ public class CourseService {
                             }));
                         }));
         return new CourseIdAudienceAttributeMap(areaOfWorkMap, departmentCodeMap, interestMap);
+    }
+
+    public boolean existsById(String courseId) {
+        return courseRepository.existsById(courseId);
+    }
+
+    public Page<Course> findAllByStatusIn(List<Status> statuses, Pageable pageable) {
+        return courseRepository.findAllByStatusIn(statuses, pageable);
+    }
+
+    public Iterable<Course> findAllById(List<String> courseIds) {
+        return courseRepository.findAllById(courseIds);
     }
 }

@@ -16,7 +16,6 @@ import uk.gov.cslearning.catalogue.domain.Course;
 import uk.gov.cslearning.catalogue.domain.Status;
 import uk.gov.cslearning.catalogue.exception.CourseCannotByDeletedException;
 import uk.gov.cslearning.catalogue.mapping.DaysMapper;
-import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.service.CourseService;
 import uk.gov.cslearning.catalogue.service.RegistryService;
 
@@ -34,15 +33,13 @@ import static org.springframework.http.HttpStatus.*;
 public class CourseController {
     private static final String COURSE_STATUS = "Published";
 
-    private final CourseRepository courseRepository;
 
     private final CourseService courseService;
 
     private final RegistryService registryService;
 
     @Autowired
-    public CourseController(CourseRepository courseRepository, CourseService courseService, RegistryService registryService) {
-        this.courseRepository = courseRepository;
+    public CourseController(CourseService courseService, RegistryService registryService) {
         this.courseService = courseService;
         this.registryService = registryService;
     }
@@ -60,7 +57,7 @@ public class CourseController {
     @GetMapping
     public ResponseEntity<PageResults<Course>> list(@RequestParam(name = "status", defaultValue = COURSE_STATUS) String status,
                                                     Pageable pageable) {
-        Page<Course> results = courseRepository.findAllByStatusIn(
+        Page<Course> results = courseService.findAllByStatusIn(
                 Arrays.stream(status.split(",")).map(Status::forValue).collect(Collectors.toList()), pageable);
         return ResponseEntity.ok(new PageResults<>(results, pageable));
     }
@@ -102,7 +99,7 @@ public class CourseController {
     @GetMapping(params = "courseId")
     public ResponseEntity<Iterable<Course>> get(@RequestParam("courseId") List<String> courseIds) {
         log.debug("Getting courses with IDs {}", courseIds);
-        Iterable<Course> result = courseRepository.findAllById(courseIds);
+        Iterable<Course> result = courseService.findAllById(courseIds);
         return new ResponseEntity<>(result, OK);
     }
 

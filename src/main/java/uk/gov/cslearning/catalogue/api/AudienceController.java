@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.cslearning.catalogue.domain.module.Audience;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
-import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.service.AudienceService;
 import uk.gov.cslearning.catalogue.service.CourseService;
 
@@ -21,12 +20,10 @@ import static org.springframework.http.HttpStatus.*;
 @Slf4j
 public class AudienceController {
 
-    private final CourseRepository courseRepository;
     private final CourseService courseService;
     private final AudienceService audienceService;
 
-    public AudienceController(CourseRepository courseRepository, CourseService courseService, AudienceService audienceService) {
-        this.courseRepository = courseRepository;
+    public AudienceController(CourseService courseService, AudienceService audienceService) {
         this.courseService = courseService;
         this.audienceService = audienceService;
     }
@@ -78,14 +75,14 @@ public class AudienceController {
     public ResponseEntity deleteAudience(@PathVariable String courseId, @PathVariable String audienceId, Authentication authentication) {
         log.debug("Deleting audience, course ID {}, audience ID {}", courseId, audienceId);
 
-        courseRepository.findById(courseId)
+        courseService.findById(courseId)
                 .map(course -> audienceService.find(course, audienceId)
                         .map(audience -> {
                             if (!audienceService.isPermitted(courseId, authentication)) {
                                 return ResponseEntity.badRequest().build();
                             }
                             course.deleteAudience(audience);
-                            return courseRepository.save(course);
+                            return courseService.save(course);
                         })
                         .orElseThrow(ResourceNotFoundException::new)
                 )

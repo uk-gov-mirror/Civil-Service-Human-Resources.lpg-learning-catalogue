@@ -10,7 +10,7 @@ import uk.gov.cslearning.catalogue.domain.module.Event;
 import uk.gov.cslearning.catalogue.domain.module.FaceToFaceModule;
 import uk.gov.cslearning.catalogue.domain.module.Module;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
-import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
+import uk.gov.cslearning.catalogue.service.CourseService;
 import uk.gov.cslearning.catalogue.service.EventService;
 
 import java.util.Optional;
@@ -24,11 +24,11 @@ import static org.springframework.http.HttpStatus.OK;
 public class EventController {
 
     private final EventService eventService;
-    private final CourseRepository courseRepository;
+    private final CourseService courseService;
 
-    public EventController(EventService eventService, CourseRepository courseRepository) {
+    public EventController(EventService eventService, CourseService courseService) {
         this.eventService = eventService;
-        this.courseRepository = courseRepository;
+        this.courseService = courseService;
     }
 
     @PostMapping
@@ -57,14 +57,14 @@ public class EventController {
     public ResponseEntity<Event> updateEvent(@PathVariable String courseId, @PathVariable String moduleId, @PathVariable String eventId, @RequestBody Event newEvent) {
         log.debug("Updating event with ID {}", eventId);
 
-        if (!courseRepository.existsById(courseId)) {
+        if (!courseService.existsById(courseId)) {
             return ResponseEntity.badRequest().build();
         }
-        if (courseRepository.findById(courseId).get().getModuleById(moduleId) == null) {
+        if (courseService.findById(courseId).get().getModuleById(moduleId) == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        Optional<Course> result = courseRepository.findById(courseId);
+        Optional<Course> result = courseService.findById(courseId);
 
         return result.map(course -> {
             Module module = course.getModuleById(moduleId)
@@ -81,7 +81,7 @@ public class EventController {
 
                 Optional.ofNullable(newEvent.getVenue()).ifPresent(event::setVenue);
 
-                courseRepository.save(course);
+                courseService.save(course);
 
                 return ResponseEntity.ok().body(event);
             }
@@ -94,14 +94,14 @@ public class EventController {
     @PreAuthorize("(hasPermission(#courseId, 'write') and hasAnyAuthority(T(uk.gov.cslearning.catalogue.domain.Roles).LEARNING_DELETE, T(uk.gov.cslearning.catalogue.domain.Roles).LEARNING_MANAGER, T(uk.gov.cslearning.catalogue.domain.Roles).CSL_AUTHOR))")
     public ResponseEntity deleteEvent(@PathVariable String courseId, @PathVariable String moduleId, @PathVariable String eventId) {
         log.debug("Deleting event with id {}", eventId);
-        if (!courseRepository.existsById(courseId)) {
+        if (!courseService.existsById(courseId)) {
             return ResponseEntity.badRequest().build();
         }
-        if (courseRepository.findById(courseId).get().getModuleById(moduleId) == null) {
+        if (courseService.findById(courseId).get().getModuleById(moduleId) == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        Optional<Course> result = courseRepository.findById(courseId);
+        Optional<Course> result = courseService.findById(courseId);
 
         return result.map(course -> {
             Module module = course.getModuleById(moduleId).orElseThrow(ResourceNotFoundException::new);
@@ -113,7 +113,7 @@ public class EventController {
 
                 faceToFaceModule.removeEvent(event);
 
-                courseRepository.save(course);
+                courseService.save(course);
 
                 return ResponseEntity.noContent().build();
             }

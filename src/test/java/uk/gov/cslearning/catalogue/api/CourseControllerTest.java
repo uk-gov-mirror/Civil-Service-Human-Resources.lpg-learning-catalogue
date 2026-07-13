@@ -24,7 +24,6 @@ import uk.gov.cslearning.catalogue.domain.CivilServant.OrganisationalUnit;
 import uk.gov.cslearning.catalogue.domain.Course;
 import uk.gov.cslearning.catalogue.domain.Status;
 import uk.gov.cslearning.catalogue.domain.Visibility;
-import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.service.CourseService;
 import uk.gov.cslearning.catalogue.service.RegistryService;
 
@@ -51,9 +50,6 @@ public class CourseControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private CourseRepository courseRepository;
 
     @MockBean
     private CourseService courseService;
@@ -95,7 +91,7 @@ public class CourseControllerTest {
     public void shouldDefaultToShowingAllPublicCourses() throws Exception {
         Course course = new Course();
 
-        when(courseRepository.findAllByStatusIn(eq(Collections.singletonList(Status.PUBLISHED)), any(Pageable.class)))
+        when(courseService.findAllByStatusIn(eq(Collections.singletonList(Status.PUBLISHED)), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(Collections.singletonList(course)));
 
         mockMvc.perform(
@@ -109,7 +105,7 @@ public class CourseControllerTest {
     public void shouldFindMultipleStatuses() throws Exception {
         Course course = new Course();
 
-        when(courseRepository.findAllByStatusIn(eq(Arrays.asList(Status.DRAFT, Status.PUBLISHED, Status.ARCHIVED)), any(Pageable.class)))
+        when(courseService.findAllByStatusIn(eq(Arrays.asList(Status.DRAFT, Status.PUBLISHED, Status.ARCHIVED)), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(Collections.singletonList(course)));
 
         mockMvc.perform(
