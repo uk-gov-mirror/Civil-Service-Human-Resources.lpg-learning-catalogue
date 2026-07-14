@@ -9,7 +9,7 @@ import uk.gov.cslearning.catalogue.dto.rustici.course.CreateCourse;
 import uk.gov.cslearning.catalogue.dto.rustici.course.CreateCourseResponse;
 import uk.gov.cslearning.catalogue.exception.InvalidScormException;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
-import uk.gov.cslearning.catalogue.repository.MediaRepository;
+import uk.gov.cslearning.catalogue.repository.elastic.MediaRepository;
 
 @Service
 @Slf4j
@@ -28,7 +28,7 @@ public class RusticiEngineService {
     }
 
     public void uploadElearningModule(String courseId, String moduleId, String mediaId) {
-        Media media = mediaRepository.findById(mediaId).orElseThrow(ResourceNotFoundException::resourceNotFoundException);
+        Media media = mediaRepository.findById(mediaId).orElseThrow(ResourceNotFoundException::new);
         String manifestFile = media.getMetadataWithCustomKey(CustomMediaMetadata.ELEARNING_MANIFEST);
         if (manifestFile == null) {
             throw new InvalidScormException(String.format("ELearning media with ID %s does now have a valid manifest metadata tag", mediaId));

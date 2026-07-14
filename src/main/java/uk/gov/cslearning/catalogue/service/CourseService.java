@@ -11,7 +11,6 @@ import uk.gov.cslearning.catalogue.api.v2.model.CourseIdAudienceAttributeMap;
 import uk.gov.cslearning.catalogue.api.v2.model.CourseSearchParameters;
 import uk.gov.cslearning.catalogue.api.v2.model.RequiredLearningIdMap;
 import uk.gov.cslearning.catalogue.domain.CivilServant.CivilServant;
-import uk.gov.cslearning.catalogue.domain.CivilServant.OrganisationalUnit;
 import uk.gov.cslearning.catalogue.domain.Course;
 import uk.gov.cslearning.catalogue.domain.Owner.OwnerFactory;
 import uk.gov.cslearning.catalogue.domain.Status;
@@ -21,7 +20,7 @@ import uk.gov.cslearning.catalogue.domain.module.FaceToFaceModule;
 import uk.gov.cslearning.catalogue.domain.module.Module;
 import uk.gov.cslearning.catalogue.domain.validation.CourseValidator;
 import uk.gov.cslearning.catalogue.exception.CourseCannotByDeletedException;
-import uk.gov.cslearning.catalogue.repository.CourseRepository;
+import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -30,7 +29,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @Service
 public class CourseService {
@@ -71,7 +69,7 @@ public class CourseService {
 
         civilServant.setSupplier(authoritiesService.getSupplier(authentication));
 
-        course.setOwner(ownerFactory.create(civilServant, course));
+        course.setOwner(ownerFactory.create(civilServant));
         course.setCreatedTimestamp(LocalDateTime.now(Clock.systemUTC()));
 
         if (course.getHasBeenPublished() == null) {
@@ -99,7 +97,6 @@ public class CourseService {
         course.setDescription(newCourse.getDescription());
         course.setTopicId(newCourse.getTopicId());
         course.setUpdatedTimestamp(LocalDateTime.now(Clock.systemUTC()));
-        Optional.ofNullable(newCourse.getLearningProvider()).ifPresent(course::setLearningProvider);
 
         if (newCourse.getHasBeenPublished() == null) {
             if (newCourse.getStatus().equals(Status.PUBLISHED)) {
@@ -156,22 +153,6 @@ public class CourseService {
 
     public Page<Course> findAllCourses(Pageable pageable) {
         return courseRepository.findAll(pageable);
-    }
-
-    public List<String> getOrganisationParents(String departments) {
-        List<String> list = new ArrayList<>();
-        if (departments != null && !departments.equals("NONE")) {
-            List<String> collect = Arrays.stream(departments.split(",")).collect(Collectors.toList());
-            collect.forEach(s -> {
-                for (OrganisationalUnit organisationalUnit : registryService.getOrganisationalUnit(s)) {
-                    if (organisationalUnit != null) {
-                        String code = organisationalUnit.getCode();
-                        list.add(code);
-                    }
-                }
-            });
-        }
-        return list;
     }
 
     public List<Course> fetchMandatoryCoursesByDueDate(Collection<Long> days) {
@@ -315,5 +296,17 @@ public class CourseService {
                             }));
                         }));
         return new CourseIdAudienceAttributeMap(areaOfWorkMap, departmentCodeMap, interestMap);
+    }
+
+    public boolean existsById(String courseId) {
+        return courseRepository.existsById(courseId);
+    }
+
+    public Page<Course> findAllByStatusIn(List<Status> statuses, Pageable pageable) {
+        return courseRepository.findAllByStatusIn(statuses, pageable);
+    }
+
+    public Iterable<Course> findAllById(List<String> courseIds) {
+        return courseRepository.findAllById(courseIds);
     }
 }

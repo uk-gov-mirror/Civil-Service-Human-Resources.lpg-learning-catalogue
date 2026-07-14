@@ -48,8 +48,6 @@ public class Course {
 
     private List<Module> modules = new ArrayList<>();
 
-    private LearningProvider learningProvider;
-
     @Field(type = FieldType.Nested)
     private Set<Audience> audiences = new HashSet<>();
 
@@ -94,7 +92,7 @@ public class Course {
     public List<Audience> getRequiredAudiences() {
         return getAudiences().stream().filter(Audience::isRequired).collect(Collectors.toList());
     }
-    
+
     @JsonIgnore
     public void upsertModule(Module newModule) {
         List<Module> mods = new ArrayList<>(getModules());

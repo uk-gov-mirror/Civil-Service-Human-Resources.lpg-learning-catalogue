@@ -10,7 +10,6 @@ import java.util.List;
 public class EventDto {
     private String id;
     private ModuleDto module;
-    private LearningProviderDto learningProvider;
     private List<DateRange> dateRanges = new ArrayList<>();
     private String location;
     private String eventDate;

@@ -10,7 +10,7 @@ import uk.gov.cslearning.catalogue.domain.Owner.Owner;
 import uk.gov.cslearning.catalogue.domain.Status;
 import uk.gov.cslearning.catalogue.domain.Visibility;
 import uk.gov.cslearning.catalogue.domain.module.*;
-import uk.gov.cslearning.catalogue.repository.CourseRepository;
+import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -20,13 +20,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class DataService {
 
     @Getter
     private final CourseRepository repository;
+
     public DataService(CourseRepository repository) {
         this.repository = repository;
     }
@@ -179,7 +179,7 @@ public class DataService {
         return courses;
     }
 
-    public Course createCourse(String title, String shortDesc,  String longDesc, Visibility visibility, Status status) {
+    public Course createCourse(String title, String shortDesc, String longDesc, Visibility visibility, Status status) {
         Course course = new Course(title, shortDesc, longDesc, visibility);
         course.setId(title);
         course.setStatus(status);
@@ -248,10 +248,6 @@ public class DataService {
     }
 
     // Audience
-
-    public List<Audience> createRequiredLearningAudiences(Collection<Collection<String>> departments) {
-        return departments.stream().map(DataService::createRequiredLearningAudience).collect(Collectors.toList());
-    }
 
     public static Audience createRequiredLearningAudience(Collection<String> departments) {
         Audience a = createAudience(departments, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());

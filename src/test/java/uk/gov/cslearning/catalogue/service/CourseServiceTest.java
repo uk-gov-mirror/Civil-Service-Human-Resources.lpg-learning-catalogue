@@ -14,15 +14,18 @@ import org.springframework.security.core.Authentication;
 import uk.gov.cslearning.catalogue.domain.CivilServant.CivilServant;
 import uk.gov.cslearning.catalogue.domain.CivilServant.OrganisationalUnit;
 import uk.gov.cslearning.catalogue.domain.CivilServant.Profession;
-import uk.gov.cslearning.catalogue.domain.*;
+import uk.gov.cslearning.catalogue.domain.Course;
 import uk.gov.cslearning.catalogue.domain.Owner.Owner;
 import uk.gov.cslearning.catalogue.domain.Owner.OwnerFactory;
+import uk.gov.cslearning.catalogue.domain.Scope;
+import uk.gov.cslearning.catalogue.domain.Status;
+import uk.gov.cslearning.catalogue.domain.Visibility;
 import uk.gov.cslearning.catalogue.domain.module.Audience;
 import uk.gov.cslearning.catalogue.domain.module.FaceToFaceModule;
 import uk.gov.cslearning.catalogue.domain.module.LinkModule;
 import uk.gov.cslearning.catalogue.domain.module.Module;
 import uk.gov.cslearning.catalogue.domain.validation.CourseValidator;
-import uk.gov.cslearning.catalogue.repository.CourseRepository;
+import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -46,9 +49,7 @@ public class CourseServiceTest {
     private static final PageRequest PAGEABLE = PageRequest.of(0, 10);
     private static final Long PROFESSION_ID = 1L;
     private static final Scope SCOPE = Scope.GLOBAL;
-    private static final String LEARNING_PROVIDER_ID = "UUID";
     private static final String TEST_DEPARTMENT_1 = "test-department-1";
-    private static final String TEST_DEPARTMENT_2 = "test-department-2";
 
     @Mock
     private CourseRepository courseRepository;
@@ -155,12 +156,9 @@ public class CourseServiceTest {
         profession.setId(PROFESSION_ID);
         civilServant.setProfession(profession);
 
-        LearningProvider learningProvider = new LearningProvider();
-        learningProvider.setId(LEARNING_PROVIDER_ID);
-
         when(registryService.getCurrentCivilServant()).thenReturn(civilServant);
         when(authoritiesService.getScope(authentication)).thenReturn(SCOPE);
-        when(ownerFactory.create(civilServant, course)).thenReturn(owner);
+        when(ownerFactory.create(civilServant)).thenReturn(owner);
         when(courseRepository.save(course)).thenReturn(course);
 
         Course createdCourse = courseService.createCourse(course, authentication);
@@ -182,9 +180,6 @@ public class CourseServiceTest {
 
         List<Module> modules = Arrays.asList(new FaceToFaceModule("pc"));
         course.setModules(modules);
-
-        LearningProvider learningProvider = new LearningProvider();
-        course.setLearningProvider(learningProvider);
 
         Audience audience = new Audience();
         Set<Audience> audiences = new HashSet<>();
@@ -213,9 +208,6 @@ public class CourseServiceTest {
         List<Module> modules2 = Arrays.asList(new LinkModule(new URL("https://www.example.com")));
         newCourse.setModules(modules2);
 
-        LearningProvider learningProvider2 = new LearningProvider();
-        newCourse.setLearningProvider(learningProvider2);
-
         Audience audience2 = new Audience();
         Set<Audience> audiences2 = new HashSet<>();
         audiences.add(audience2);
@@ -240,7 +232,6 @@ public class CourseServiceTest {
         assertEquals(newShortDescription, savedCourse.getShortDescription());
         assertEquals(newDescription, savedCourse.getDescription());
         assertEquals(newLearningOutcomes, savedCourse.getLearningOutcomes());
-        assertEquals(learningProvider2, savedCourse.getLearningProvider());
         assertEquals(prep2, savedCourse.getPreparation());
         assertEquals(owner2, savedCourse.getOwner());
         assertEquals(visibility, savedCourse.getVisibility());

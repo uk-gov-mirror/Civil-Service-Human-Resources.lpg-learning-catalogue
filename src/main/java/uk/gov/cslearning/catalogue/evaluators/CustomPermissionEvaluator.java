@@ -78,12 +78,6 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
                     return true;
                 }
             }
-            if (grantedAuth.getAuthority().equals(Roles.PROFESSION_AUTHOR)) {
-                if (civilServant == null)  civilServant = registryService.getCurrentCivilServant();
-                if (authoritiesService.isProfessionIdEqual(civilServant, course.getOwner())) {
-                    return true;
-                }
-            }
             if ((grantedAuth.getAuthority().equals(Roles.KPMG_SUPPLIER_AUTHOR)
                     || grantedAuth.getAuthority().equals(Roles.KORNFERRY_SUPPLIER_AUTHOR)
                     || grantedAuth.getAuthority().equals(Roles.KNOWLEDGEPOOL_SUPPLIER_AUTHOR)) && authoritiesService.isSupplierEqual(auth, course.getOwner())) {

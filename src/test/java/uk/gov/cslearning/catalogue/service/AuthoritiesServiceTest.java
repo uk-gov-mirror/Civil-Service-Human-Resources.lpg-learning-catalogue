@@ -25,7 +25,6 @@ public class AuthoritiesServiceTest {
 
     private static final String ORGANISATIONAL_UNIT_CODE = "code";
     private static final Long PROFESSION_ID = 1L;
-    private static final String LEARNING_PROVIDER_ID = "UUID";
 
     @Mock
     private Authentication authentication;

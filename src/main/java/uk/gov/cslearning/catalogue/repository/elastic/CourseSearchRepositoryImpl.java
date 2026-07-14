@@ -1,4 +1,4 @@
-package uk.gov.cslearning.catalogue.repository;
+package uk.gov.cslearning.catalogue.repository.elastic;
 
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.unit.Fuzziness;
