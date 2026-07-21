@@ -5,7 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.cslearning.catalogue.api.models.PageableParams;
 import uk.gov.cslearning.catalogue.api.models.SimplePage;
+import uk.gov.cslearning.catalogue.domain.LearningTagBulkStateDto;
 import uk.gov.cslearning.catalogue.domain.LearningTagDto;
+import uk.gov.cslearning.catalogue.dto.BulkUpdateDto;
 import uk.gov.cslearning.catalogue.service.LearningTagService;
 
 import javax.validation.Valid;
@@ -41,5 +43,13 @@ public class LearningTagController {
     public LearningTagDto updateTag(@PathVariable Long learningTagId, @Valid @RequestBody LearningTagDto learningTag) {
         return learningTagService.updateLearningTag(learningTagId, learningTag);
     }
+
+    @PutMapping("/state")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    public BulkUpdateDto updateTagState(@Valid @RequestBody LearningTagBulkStateDto dto) {
+        return learningTagService.updateLearningTagState(dto);
+    }
+
 
 }
