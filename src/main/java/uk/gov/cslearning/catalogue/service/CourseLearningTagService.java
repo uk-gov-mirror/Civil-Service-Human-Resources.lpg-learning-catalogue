@@ -24,10 +24,10 @@ public class CourseLearningTagService {
         this.learningTagFactory = learningTagFactory;
     }
 
-    public CourseLearningTagDto addLearningTagToCourse(Long courseId, LearningTagDto learningTagDto) {
-        log.info("Adding learning tag {} to course {}", learningTagDto.getId(), courseId);
-        CourseEntity courseEntity = courseRepository.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Course with ID %s not found", courseId)));
+    public CourseLearningTagDto addLearningTagToCourse(String courseUid, LearningTagDto learningTagDto) {
+        log.info("Adding learning tag {} to course {}", learningTagDto.getId(), courseUid);
+        CourseEntity courseEntity = courseRepository.findByUid(courseUid)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Course with UID %s not found", courseUid)));
 
         LearningTag learningTag = learningTagRepository.findById(learningTagDto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Learning tag with ID %s not found", learningTagDto.getId())));
@@ -36,17 +36,20 @@ public class CourseLearningTagService {
         courseTagRepository.save(courseLearningTagEntity);
 
         LearningTagDto tagDto = learningTagFactory.createDto(learningTag);
-        log.info("Added learning tag {} to course {}", learningTagDto.getId(), courseId);
+        log.info("Added learning tag {} to course {}", learningTagDto.getId(), courseUid);
         return new CourseLearningTagDto(courseEntity.getId(), courseEntity.getUid(), courseEntity.getTitle(), tagDto);
     }
 
-    public void removeLearningTagFromCourse(Long courseId, Long learningTagId) {
-        log.info("Removing learning tag {} from course {}", learningTagId, courseId);
-        CourseLearningTagId courseLearningTagId = new CourseLearningTagId(learningTagId, courseId);
+    public void removeLearningTagFromCourse(String courseUid, Long learningTagId) {
+        log.info("Removing learning tag {} from course {}", learningTagId, courseUid);
+        CourseEntity courseEntity = courseRepository.findByUid(courseUid)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Course with UID %s not found", courseUid)));
+
+        CourseLearningTagId courseLearningTagId = new CourseLearningTagId(learningTagId, courseEntity.getId());
         if (!courseTagRepository.existsById(courseLearningTagId)) {
-            throw new ResourceNotFoundException(String.format("Association between course %s and learning tag %s not found", courseId, learningTagId));
+            throw new ResourceNotFoundException(String.format("Association between course %s and learning tag %s not found", courseUid, learningTagId));
         }
         courseTagRepository.deleteById(courseLearningTagId);
-        log.info("Removed learning tag {} from course {}", learningTagId, courseId);
+        log.info("Removed learning tag {} from course {}", learningTagId, courseUid);
     }
 }

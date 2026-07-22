@@ -22,9 +22,10 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
     public void testAddLearningTagToCourse() throws Exception {
         CourseEntity course = new CourseEntity("course-uid", "Test Course");
         course = courseRepository.save(course);
+        String courseUid = course.getUid();
         Long courseId = course.getId();
 
-        mvc.perform(post("/courses/" + courseId + "/learning-tags")
+        mvc.perform(post("/courses/" + courseUid + "/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": 1}"))
                 .andExpect(status().isCreated())
@@ -40,23 +41,23 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
     public void testRemoveLearningTagFromCourse() throws Exception {
         CourseEntity course = new CourseEntity("course-uid-2", "Test Course 2");
         course = courseRepository.save(course);
-        Long courseId = course.getId();
+        String courseUid = course.getUid();
 
         // Add tag first
-        mvc.perform(post("/courses/" + courseId + "/learning-tags")
+        mvc.perform(post("/courses/" + courseUid + "/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": 2}"))
                 .andExpect(status().isCreated());
 
         // Remove tag
-        mvc.perform(delete("/courses/" + courseId + "/learning-tags/2"))
+        mvc.perform(delete("/courses/" + courseUid + "/learning-tags/2"))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     @Transactional
     public void testAddTagToNonExistentCourse() throws Exception {
-        mvc.perform(post("/courses/999/learning-tags")
+        mvc.perform(post("/courses/non-existent-uid/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": 1}"))
                 .andExpect(status().isNotFound());
@@ -67,9 +68,9 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
     public void testAddNonExistentTagToCourse() throws Exception {
         CourseEntity course = new CourseEntity("course-uid-3", "Test Course 3");
         course = courseRepository.save(course);
-        Long courseId = course.getId();
+        String courseUid = course.getUid();
 
-        mvc.perform(post("/courses/" + courseId + "/learning-tags")
+        mvc.perform(post("/courses/" + courseUid + "/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": 999}"))
                 .andExpect(status().isNotFound());

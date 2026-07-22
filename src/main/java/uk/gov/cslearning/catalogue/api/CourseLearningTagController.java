@@ -7,7 +7,7 @@ import uk.gov.cslearning.catalogue.domain.LearningTagDto;
 import uk.gov.cslearning.catalogue.service.CourseLearningTagService;
 
 @RestController
-@RequestMapping("/courses/{courseId}/learning-tags")
+@RequestMapping("/courses/{courseUid}/learning-tags")
 public class CourseLearningTagController {
 
     private final CourseLearningTagService courseLearningTagService;
@@ -18,13 +18,13 @@ public class CourseLearningTagController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CourseLearningTagDto addLearningTagToCourse(@PathVariable Long courseId, @RequestBody LearningTagDto learningTagDto) {
-        return courseLearningTagService.addLearningTagToCourse(courseId, learningTagDto);
+    public CourseLearningTagDto addLearningTagToCourse(@PathVariable String courseUid, @RequestBody LearningTagDto learningTagDto) {
+        return courseLearningTagService.addLearningTagToCourse(courseUid, learningTagDto);
     }
 
     @DeleteMapping("/{learningTagId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeLearningTagFromCourse(@PathVariable Long courseId, @PathVariable Long learningTagId) {
-        courseLearningTagService.removeLearningTagFromCourse(courseId, learningTagId);
+    public void removeLearningTagFromCourse(@PathVariable String courseUid, @PathVariable Long learningTagId) {
+        courseLearningTagService.removeLearningTagFromCourse(courseUid, learningTagId);
     }
 }
