@@ -28,8 +28,11 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": 1}"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Project management"));
+                .andExpect(jsonPath("$.id").value(courseId))
+                .andExpect(jsonPath("$.uid").value("course-uid"))
+                .andExpect(jsonPath("$.title").value("Test Course"))
+                .andExpect(jsonPath("$.learningTag.id").value(1))
+                .andExpect(jsonPath("$.learningTag.name").value("Project management"));
     }
 
     @Test
