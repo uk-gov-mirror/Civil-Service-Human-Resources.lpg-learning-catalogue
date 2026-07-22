@@ -3,9 +3,12 @@ package uk.gov.cslearning.catalogue.service;
 import org.springframework.stereotype.Service;
 import uk.gov.cslearning.catalogue.domain.LearningTag;
 import uk.gov.cslearning.catalogue.domain.LearningTagDto;
+import uk.gov.cslearning.catalogue.domain.LearningTagState;
 import uk.gov.cslearning.catalogue.service.util.IUtilService;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LearningTagFactory {
@@ -55,5 +58,14 @@ public class LearningTagFactory {
         learningTag = update(learningTag, learningTagDto);
         learningTag.setParent(parent);
         return learningTag;
+    }
+
+    public List<LearningTag> updateState(List<LearningTag> tags, LearningTagState state) {
+        LocalDateTime now = utilService.getNowDateTime();
+        return tags.stream().peek(lt -> {
+            lt.setArchived(state == LearningTagState.ARCHIVE);
+            lt.setArchivedTimestamp(state == LearningTagState.ARCHIVE ? now : null);
+            lt.setUpdatedTimestamp(now);
+        }).collect(Collectors.toList());
     }
 }

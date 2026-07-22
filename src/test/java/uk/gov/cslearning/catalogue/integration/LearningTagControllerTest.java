@@ -164,4 +164,17 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.archived").value(false))
                 .andExpect(jsonPath("$.category").value(true));
     }
+
+    @Test
+    @Transactional
+    public void testUpdateLearningTagState() throws Exception {
+
+        mvc.perform(put("/learning-tags/state")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"state\":  \"ARCHIVE\", \"ids\": [1, 2]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.successfulUpdates[0]").value(1))
+                .andExpect(jsonPath("$.successfulUpdates[1]").value(2))
+                .andExpect(jsonPath("$.failedUpdates").isEmpty());
+    }
 }

@@ -5,11 +5,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.gov.cslearning.catalogue.api.models.SimplePage;
 import uk.gov.cslearning.catalogue.domain.LearningTag;
+import uk.gov.cslearning.catalogue.domain.LearningTagBulkStateDto;
 import uk.gov.cslearning.catalogue.domain.LearningTagDto;
+import uk.gov.cslearning.catalogue.dto.BulkUpdateDto;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -55,5 +59,21 @@ public class LearningTagService {
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Learning tag with ID %s not found", learningTagId)));
         learningTagRepository.save(tag);
         return learningTagFactory.createDto(tag);
+    }
+
+    public BulkUpdateDto updateLearningTagState(@Valid LearningTagBulkStateDto dto) {
+        List<LearningTag> tags = learningTagRepository.findAllById(dto.getIds());
+        List<Long> successful = new ArrayList<>();
+        List<Long> failed = new ArrayList<>();
+        learningTagFactory.updateState(tags, dto.getState())
+                .forEach(lt -> {
+                    try {
+                        learningTagRepository.save(lt);
+                        successful.add(lt.getId());
+                    } catch (Exception e) {
+                        failed.add(lt.getId());
+                    }
+                });
+        return new BulkUpdateDto(successful, failed);
     }
 }
