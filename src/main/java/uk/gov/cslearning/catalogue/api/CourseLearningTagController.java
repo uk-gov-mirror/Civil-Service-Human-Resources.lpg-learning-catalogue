@@ -22,9 +22,9 @@ public class CourseLearningTagController {
         return courseLearningTagService.addLearningTagToCourse(courseUid, learningTagDto);
     }
 
-    @DeleteMapping("/{learningTagId}")
+    @DeleteMapping("/{learningTagCode}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeLearningTagFromCourse(@PathVariable String courseUid, @PathVariable Long learningTagId) {
-        courseLearningTagService.removeLearningTagFromCourse(courseUid, learningTagId);
+    public void removeLearningTagFromCourse(@PathVariable String courseUid, @PathVariable String learningTagCode) {
+        courseLearningTagService.removeLearningTagFromCourse(courseUid, learningTagCode);
     }
 }

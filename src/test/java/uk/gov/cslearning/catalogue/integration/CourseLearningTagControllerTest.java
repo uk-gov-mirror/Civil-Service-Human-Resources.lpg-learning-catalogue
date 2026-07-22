@@ -57,7 +57,7 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(status().isCreated());
 
         // Remove tag
-        mvc.perform(delete("/courses/" + courseUid + "/learning-tags/2"))
+        mvc.perform(delete("/courses/" + courseUid + "/learning-tags/TECH"))
                 .andExpect(status().isNoContent());
     }
 
