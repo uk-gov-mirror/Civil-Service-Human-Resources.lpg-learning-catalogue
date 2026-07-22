@@ -19,7 +19,7 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
 
     @Test
     @Transactional
-    public void testAddTagToCourse() throws Exception {
+    public void testAddLearningTagToCourse() throws Exception {
         CourseEntity course = new CourseEntity("course-uid", "Test Course");
         course = courseRepository.save(course);
         Long courseId = course.getId();
@@ -37,7 +37,7 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
 
     @Test
     @Transactional
-    public void testRemoveTagFromCourse() throws Exception {
+    public void testRemoveLearningTagFromCourse() throws Exception {
         CourseEntity course = new CourseEntity("course-uid-2", "Test Course 2");
         course = courseRepository.save(course);
         Long courseId = course.getId();

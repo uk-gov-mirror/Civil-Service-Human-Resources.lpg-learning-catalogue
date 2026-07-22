@@ -18,13 +18,13 @@ public class CourseLearningTagController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CourseDto addTagToCourse(@PathVariable Long courseId, @RequestBody LearningTagDto learningTagDto) {
-        return courseLearningTagService.addTagToCourse(courseId, learningTagDto);
+    public CourseDto addLearningTagToCourse(@PathVariable Long courseId, @RequestBody LearningTagDto learningTagDto) {
+        return courseLearningTagService.addLearningTagToCourse(courseId, learningTagDto);
     }
 
     @DeleteMapping("/{learningTagId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeTagFromCourse(@PathVariable Long courseId, @PathVariable Long learningTagId) {
-        courseLearningTagService.removeTagFromCourse(courseId, learningTagId);
+    public void removeLearningTagFromCourse(@PathVariable Long courseId, @PathVariable Long learningTagId) {
+        courseLearningTagService.removeLearningTagFromCourse(courseId, learningTagId);
     }
 }

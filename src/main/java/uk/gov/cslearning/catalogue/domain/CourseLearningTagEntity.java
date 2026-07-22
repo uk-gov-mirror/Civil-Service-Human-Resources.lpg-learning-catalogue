@@ -12,7 +12,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Table(name = "course_tags")
 @IdClass(CourseLearningTagId.class)
-public class CourseTagEntity {
+public class CourseLearningTagEntity {
 
     @Id
     @ManyToOne
@@ -24,7 +24,7 @@ public class CourseTagEntity {
     @JoinColumn(name = "course_id", referencedColumnName = "id")
     private CourseEntity course;
 
-    public CourseTagEntity(LearningTag learningTag, CourseEntity course) {
+    public CourseLearningTagEntity(LearningTag learningTag, CourseEntity course) {
         this.learningTag = learningTag;
         this.course = course;
     }
