@@ -16,18 +16,27 @@ public class CourseLearningTagService {
     private final ILearningTagRepository learningTagRepository;
     private final ICourseTagRepository courseTagRepository;
     private final LearningTagFactory learningTagFactory;
+    private final CourseService courseService;
 
-    public CourseLearningTagService(ICourseRepository courseRepository, ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository, LearningTagFactory learningTagFactory) {
+    public CourseLearningTagService(ICourseRepository courseRepository, ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository, LearningTagFactory learningTagFactory, CourseService courseService) {
         this.courseRepository = courseRepository;
         this.learningTagRepository = learningTagRepository;
         this.courseTagRepository = courseTagRepository;
         this.learningTagFactory = learningTagFactory;
+        this.courseService = courseService;
     }
 
     public CourseLearningTagDto addLearningTagToCourse(String courseUid, LearningTagDto learningTagDto) {
         log.info("Adding learning tag {} to course {}", learningTagDto.getId(), courseUid);
         CourseEntity courseEntity = courseRepository.findByUid(courseUid)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Course with UID %s not found", courseUid)));
+                .orElseGet(() -> {
+                    try {
+                        Course course = courseService.getCourseById(courseUid);
+                        return courseRepository.save(new CourseEntity(course.getId(), course.getTitle()));
+                    } catch (IllegalStateException e) {
+                        throw new ResourceNotFoundException(String.format("Course with UID %s not found", courseUid));
+                    }
+                });
 
         LearningTag learningTag = learningTagRepository.findById(learningTagDto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Learning tag with ID %s not found", learningTagDto.getId())));

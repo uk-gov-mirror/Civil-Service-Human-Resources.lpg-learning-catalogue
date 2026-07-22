@@ -2,11 +2,15 @@ package uk.gov.cslearning.catalogue.integration;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.cslearning.catalogue.domain.Course;
 import uk.gov.cslearning.catalogue.domain.CourseEntity;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
+import uk.gov.cslearning.catalogue.service.CourseService;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -16,6 +20,9 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
 
     @Autowired
     private ICourseRepository courseRepository;
+
+    @MockBean
+    private CourseService courseService;
 
     @Test
     @Transactional
@@ -56,8 +63,31 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
 
     @Test
     @Transactional
+    public void testAddLearningTagToCourseImportingFromCourseService() throws Exception {
+        String courseUid = "imported-course-uid";
+        String courseTitle = "Imported Course Title";
+        Course course = new Course();
+        course.setId(courseUid);
+        course.setTitle(courseTitle);
+
+        when(courseService.getCourseById(courseUid)).thenReturn(course);
+
+        mvc.perform(post("/courses/" + courseUid + "/learning-tags")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"id\": 1}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.uid").value(courseUid))
+                .andExpect(jsonPath("$.title").value(courseTitle))
+                .andExpect(jsonPath("$.learningTag.id").value(1));
+    }
+
+    @Test
+    @Transactional
     public void testAddTagToNonExistentCourse() throws Exception {
-        mvc.perform(post("/courses/non-existent-uid/learning-tags")
+        String nonExistentUid = "non-existent-uid";
+        when(courseService.getCourseById(nonExistentUid)).thenThrow(new IllegalStateException("Not found"));
+
+        mvc.perform(post("/courses/" + nonExistentUid + "/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": 1}"))
                 .andExpect(status().isNotFound());
