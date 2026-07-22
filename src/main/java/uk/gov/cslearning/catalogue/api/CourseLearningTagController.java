@@ -2,7 +2,7 @@ package uk.gov.cslearning.catalogue.api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import uk.gov.cslearning.catalogue.domain.CourseDto;
+import uk.gov.cslearning.catalogue.domain.CourseLearningTagDto;
 import uk.gov.cslearning.catalogue.domain.LearningTagDto;
 import uk.gov.cslearning.catalogue.service.CourseLearningTagService;
 
@@ -18,7 +18,7 @@ public class CourseLearningTagController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CourseDto addLearningTagToCourse(@PathVariable Long courseId, @RequestBody LearningTagDto learningTagDto) {
+    public CourseLearningTagDto addLearningTagToCourse(@PathVariable Long courseId, @RequestBody LearningTagDto learningTagDto) {
         return courseLearningTagService.addLearningTagToCourse(courseId, learningTagDto);
     }
 
