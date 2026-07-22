@@ -7,18 +7,12 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cslearning.catalogue.domain.CourseEntity;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Autowired
     private ICourseRepository courseRepository;

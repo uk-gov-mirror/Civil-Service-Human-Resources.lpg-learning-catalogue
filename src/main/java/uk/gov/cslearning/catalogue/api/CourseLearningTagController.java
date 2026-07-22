@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import uk.gov.cslearning.catalogue.domain.LearningTagDto;
 import uk.gov.cslearning.catalogue.service.CourseLearningTagService;
 
-import javax.validation.Valid;
-
 @Slf4j
 @RestController
 @RequestMapping("/courses/{courseId}/learning-tags")
@@ -26,10 +24,10 @@ public class CourseLearningTagController {
         return courseLearningTagService.addTagToCourse(courseId, learningTagDto);
     }
 
-    @DeleteMapping("/{tagId}")
+    @DeleteMapping("/{learningTagId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeTagFromCourse(@PathVariable Long courseId, @PathVariable Long tagId) {
-        log.debug("Removing learning tag {} from course {}", tagId, courseId);
-        courseLearningTagService.removeTagFromCourse(courseId, tagId);
+    public void removeTagFromCourse(@PathVariable Long courseId, @PathVariable Long learningTagId) {
+        log.debug("Removing learning tag {} from course {}", learningTagId, courseId);
+        courseLearningTagService.removeTagFromCourse(courseId, learningTagId);
     }
 }

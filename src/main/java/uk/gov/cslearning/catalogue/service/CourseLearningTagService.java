@@ -35,10 +35,10 @@ public class CourseLearningTagService {
         return learningTagFactory.createDto(learningTag);
     }
 
-    public void removeTagFromCourse(Long courseId, Long tagId) {
-        CourseTagId courseTagId = new CourseTagId(tagId, courseId);
+    public void removeTagFromCourse(Long courseId, Long learningTagId) {
+        CourseTagId courseTagId = new CourseTagId(learningTagId, courseId);
         if (!courseTagRepository.existsById(courseTagId)) {
-            throw new ResourceNotFoundException(String.format("Association between course %s and tag %s not found", courseId, tagId));
+            throw new ResourceNotFoundException(String.format("Association between course %s and learning tag %s not found", courseId, learningTagId));
         }
         courseTagRepository.deleteById(courseTagId);
     }
