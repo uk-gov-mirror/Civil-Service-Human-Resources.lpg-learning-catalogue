@@ -34,7 +34,7 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
 
         mvc.perform(post("/courses/" + courseUid + "/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"id\": 1}"))
+                        .content("{\"code\": \"PM\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(courseId))
                 .andExpect(jsonPath("$.uid").value("course-uid"))
@@ -53,7 +53,7 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
         // Add tag first
         mvc.perform(post("/courses/" + courseUid + "/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"id\": 2}"))
+                        .content("{\"code\": \"TECH\"}"))
                 .andExpect(status().isCreated());
 
         // Remove tag
@@ -74,7 +74,7 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
 
         mvc.perform(post("/courses/" + courseUid + "/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"id\": 1}"))
+                        .content("{\"code\": \"PM\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.uid").value(courseUid))
                 .andExpect(jsonPath("$.title").value(courseTitle))
@@ -89,7 +89,7 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
 
         mvc.perform(post("/courses/" + nonExistentUid + "/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"id\": 1}"))
+                        .content("{\"code\": \"PM\"}"))
                 .andExpect(status().isNotFound());
     }
 
@@ -102,7 +102,7 @@ public class CourseLearningTagControllerTest extends MySQLIntegrationTestBase {
 
         mvc.perform(post("/courses/" + courseUid + "/learning-tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"id\": 999}"))
+                        .content("{\"code\": \"NON_EXISTENT\"}"))
                 .andExpect(status().isNotFound());
     }
 }

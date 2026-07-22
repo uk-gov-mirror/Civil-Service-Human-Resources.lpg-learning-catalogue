@@ -27,7 +27,7 @@ public class CourseLearningTagService {
     }
 
     public CourseLearningTagDto addLearningTagToCourse(String courseUid, LearningTagDto learningTagDto) {
-        log.info("Adding learning tag {} to course {}", learningTagDto.getId(), courseUid);
+        log.info("Adding learning tag {} to course {}", learningTagDto.getCode(), courseUid);
         CourseEntity courseEntity = courseRepository.findByUid(courseUid)
                 .orElseGet(() -> {
                     try {
@@ -38,14 +38,14 @@ public class CourseLearningTagService {
                     }
                 });
 
-        LearningTag learningTag = learningTagRepository.findById(learningTagDto.getId())
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Learning tag with ID %s not found", learningTagDto.getId())));
+        LearningTag learningTag = learningTagRepository.findByCode(learningTagDto.getCode())
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Learning tag with code %s not found", learningTagDto.getCode())));
 
         CourseLearningTagEntity courseLearningTagEntity = new CourseLearningTagEntity(learningTag, courseEntity);
         courseTagRepository.save(courseLearningTagEntity);
 
         LearningTagDto tagDto = learningTagFactory.createDto(learningTag);
-        log.info("Added learning tag {} to course {}", learningTagDto.getId(), courseUid);
+        log.info("Added learning tag {} to course {}", learningTagDto.getCode(), courseUid);
         return new CourseLearningTagDto(courseEntity.getId(), courseEntity.getUid(), courseEntity.getTitle(), tagDto);
     }
 
