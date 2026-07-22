@@ -36,10 +36,10 @@ public class CourseLearningTagService {
     }
 
     public void removeTagFromCourse(Long courseId, Long learningTagId) {
-        CourseTagId courseTagId = new CourseTagId(learningTagId, courseId);
-        if (!courseTagRepository.existsById(courseTagId)) {
+        CourseLearningTagId courseLearningTagId = new CourseLearningTagId(learningTagId, courseId);
+        if (!courseTagRepository.existsById(courseLearningTagId)) {
             throw new ResourceNotFoundException(String.format("Association between course %s and learning tag %s not found", courseId, learningTagId));
         }
-        courseTagRepository.deleteById(courseTagId);
+        courseTagRepository.deleteById(courseLearningTagId);
     }
 }

@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @Table(name = "course_tags")
-@IdClass(CourseTagId.class)
+@IdClass(CourseLearningTagId.class)
 public class CourseTagEntity {
 
     @Id

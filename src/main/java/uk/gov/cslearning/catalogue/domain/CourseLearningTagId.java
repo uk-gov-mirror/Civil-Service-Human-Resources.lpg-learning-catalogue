@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CourseTagId implements Serializable {
+public class CourseLearningTagId implements Serializable {
     private Long learningTag;
     private Long course;
 }
