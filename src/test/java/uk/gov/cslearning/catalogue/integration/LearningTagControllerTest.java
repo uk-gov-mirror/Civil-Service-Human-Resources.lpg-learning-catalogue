@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cslearning.catalogue.domain.CourseEntity;
+import uk.gov.cslearning.catalogue.domain.LearningTag;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
@@ -188,14 +189,13 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
         CourseEntity course2 = courseRepository.save(new CourseEntity("uid-a", "Course A"));
         CourseEntity course3 = courseRepository.save(new CourseEntity("uid-c", "Course C"));
 
-        uk.gov.cslearning.catalogue.domain.LearningTag tag = learningTagRepository.findById(1L).get();
+        LearningTag tag = learningTagRepository.findById(1L).get();
 
         courseTagRepository.save(new CourseLearningTagEntity(tag, course1));
         courseTagRepository.save(new CourseLearningTagEntity(tag, course2));
         courseTagRepository.save(new CourseLearningTagEntity(tag, course3));
 
-        mvc.perform(get("/learning-tags/1/courses?page=0&size=2")
-                        .with(csrf()))
+        mvc.perform(get("/learning-tags/1/courses?page=0&size=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].title").value("Course A"))
@@ -212,7 +212,6 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     public void testUpdateLearningTagState() throws Exception {
 
         mvc.perform(put("/learning-tags/state")
-                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"state\":  \"ARCHIVE\", \"ids\": [1, 2]}"))
                 .andExpect(status().isOk())
