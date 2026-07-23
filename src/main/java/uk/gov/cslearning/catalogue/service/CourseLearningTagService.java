@@ -15,38 +15,11 @@ public class CourseLearningTagService {
     private final ICourseRepository courseRepository;
     private final ILearningTagRepository learningTagRepository;
     private final ICourseTagRepository courseTagRepository;
-    private final LearningTagFactory learningTagFactory;
-    private final CourseService courseService;
 
-    public CourseLearningTagService(ICourseRepository courseRepository, ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository, LearningTagFactory learningTagFactory, CourseService courseService) {
+    public CourseLearningTagService(ICourseRepository courseRepository, ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository) {
         this.courseRepository = courseRepository;
         this.learningTagRepository = learningTagRepository;
         this.courseTagRepository = courseTagRepository;
-        this.learningTagFactory = learningTagFactory;
-        this.courseService = courseService;
-    }
-
-    public CourseLearningTagDto addLearningTagToCourse(String courseUid, LearningTagDto learningTagDto) {
-        log.info("Adding learning tag {} to course {}", learningTagDto.getCode(), courseUid);
-        CourseEntity courseEntity = courseRepository.findByUid(courseUid)
-                .orElseGet(() -> {
-                    try {
-                        Course course = courseService.getCourseById(courseUid);
-                        return courseRepository.save(new CourseEntity(course.getId(), course.getTitle()));
-                    } catch (IllegalStateException e) {
-                        throw new ResourceNotFoundException(String.format("Course with UID %s not found", courseUid));
-                    }
-                });
-
-        LearningTag learningTag = learningTagRepository.findByCode(learningTagDto.getCode())
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Learning tag with code %s not found", learningTagDto.getCode())));
-
-        CourseLearningTagEntity courseLearningTagEntity = new CourseLearningTagEntity(learningTag, courseEntity);
-        courseTagRepository.save(courseLearningTagEntity);
-
-        LearningTagDto tagDto = learningTagFactory.createDto(learningTag);
-        log.info("Added learning tag {} to course {}", learningTagDto.getCode(), courseUid);
-        return new CourseLearningTagDto(courseEntity.getId(), courseEntity.getUid(), courseEntity.getTitle(), tagDto);
     }
 
     public void removeLearningTagFromCourse(String courseUid, String learningTagCode) {
