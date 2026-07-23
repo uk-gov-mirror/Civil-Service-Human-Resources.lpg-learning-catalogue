@@ -43,6 +43,11 @@ public class SimplePage<T> extends PageImpl<T> {
         return getNumber();
     }
 
+    @JsonProperty("totalResults")
+    public long getTotalResults() {
+        return getTotalElements();
+    }
+
     @JsonProperty("sort")
     public List<String> getSortList() {
         return getSort().stream()

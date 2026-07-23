@@ -3,13 +3,29 @@ package uk.gov.cslearning.catalogue.integration;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.cslearning.catalogue.domain.CourseEntity;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
+import uk.gov.cslearning.catalogue.domain.CourseLearningTagEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class LearningTagControllerTest extends MySQLIntegrationTestBase {
+
+    @Autowired
+    private ICourseRepository courseRepository;
+
+    @Autowired
+    private ILearningTagRepository learningTagRepository;
+
+    @Autowired
+    private ICourseTagRepository courseTagRepository;
 
     @Test
     public void testGetLearningTags() throws Exception {
@@ -167,9 +183,36 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
     @Test
     @Transactional
+    public void testGetCoursesByLearningTag() throws Exception {
+        CourseEntity course1 = courseRepository.save(new CourseEntity("uid-b", "Course B"));
+        CourseEntity course2 = courseRepository.save(new CourseEntity("uid-a", "Course A"));
+        CourseEntity course3 = courseRepository.save(new CourseEntity("uid-c", "Course C"));
+
+        uk.gov.cslearning.catalogue.domain.LearningTag tag = learningTagRepository.findById(1L).get();
+
+        courseTagRepository.save(new CourseLearningTagEntity(tag, course1));
+        courseTagRepository.save(new CourseLearningTagEntity(tag, course2));
+        courseTagRepository.save(new CourseLearningTagEntity(tag, course3));
+
+        mvc.perform(get("/learning-tags/1/courses?page=0&size=2")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].title").value("Course A"))
+                .andExpect(jsonPath("$.content[0].uid").value("uid-a"))
+                .andExpect(jsonPath("$.content[1].title").value("Course B"))
+                .andExpect(jsonPath("$.content[1].uid").value("uid-b"))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(2))
+                .andExpect(jsonPath("$.totalResults").value(3));
+    }
+
+    @Test
+    @Transactional
     public void testUpdateLearningTagState() throws Exception {
 
         mvc.perform(put("/learning-tags/state")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"state\":  \"ARCHIVE\", \"ids\": [1, 2]}"))
                 .andExpect(status().isOk())
