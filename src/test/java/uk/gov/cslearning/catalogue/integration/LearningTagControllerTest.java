@@ -1,16 +1,16 @@
 package uk.gov.cslearning.catalogue.integration;
 
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.gov.cslearning.catalogue.domain.CourseEntity;
+import uk.gov.cslearning.catalogue.domain.CourseLearningTagEntity;
 import uk.gov.cslearning.catalogue.domain.LearningTag;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
-import uk.gov.cslearning.catalogue.domain.CourseLearningTagEntity;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
