@@ -1,8 +1,8 @@
 package uk.gov.cslearning.catalogue.api.models;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +17,10 @@ import java.util.stream.Collectors;
         "numberOfElements",
         "first",
         "last",
-        "empty"
+        "empty",
+        "totalElements",
+        "totalPages",
+        "sort"
 })
 public class SimplePage<T> extends PageImpl<T> {
 

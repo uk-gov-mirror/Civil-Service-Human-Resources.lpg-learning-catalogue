@@ -3,6 +3,7 @@ package uk.gov.cslearning.catalogue.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import uk.gov.cslearning.catalogue.api.models.CourseLearningTagResponse;
 import uk.gov.cslearning.catalogue.api.models.SimplePage;
 import uk.gov.cslearning.catalogue.domain.*;
 import uk.gov.cslearning.catalogue.dto.BulkUpdateDto;
@@ -35,12 +36,14 @@ public class LearningTagService {
                 page.getTotalElements(), pageable);
     }
 
-    public SimplePage<CourseLearningTagDto> getCoursesByLearningTagId(Long learningTagId, Pageable pageable) {
+    public SimplePage<CourseLearningTagResponse> getCoursesByLearningTagId(Long learningTagId, Pageable pageable) {
         Page<CourseLearningTagEntity> page = courseTagRepository.findByLearningTagIdOrderByCourseTitleAsc(learningTagId, pageable);
-        return new SimplePage<>(page.getContent().stream()
-                .map(entity -> new CourseLearningTagDto(entity.getCourse().getUid(), entity.getCourse().getTitle()))
-                .collect(Collectors.toList()),
-                page.getTotalElements(), page.getTotalPages(), page.getNumber(), page.getSize(), new ArrayList<>());
+        return new SimplePage<>(
+                page.getContent().stream()
+                        .map(entity -> new CourseLearningTagResponse(entity.getCourse().getUid(), entity.getCourse().getTitle()))
+                        .collect(Collectors.toList()),
+                page.getTotalElements(),
+                pageable);
     }
 
     public LearningTagDto createLearningTag(@Valid LearningTagDto learningTagDto) {

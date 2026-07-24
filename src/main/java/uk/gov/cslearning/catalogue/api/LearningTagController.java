@@ -3,9 +3,9 @@ package uk.gov.cslearning.catalogue.api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import uk.gov.cslearning.catalogue.api.models.CourseLearningTagResponse;
 import uk.gov.cslearning.catalogue.api.models.PageableParams;
 import uk.gov.cslearning.catalogue.api.models.SimplePage;
-import uk.gov.cslearning.catalogue.domain.CourseLearningTagDto;
 import uk.gov.cslearning.catalogue.domain.LearningTagBulkStateDto;
 import uk.gov.cslearning.catalogue.domain.LearningTagDto;
 import uk.gov.cslearning.catalogue.dto.BulkUpdateDto;
@@ -34,7 +34,7 @@ public class LearningTagController {
     @GetMapping("/{learningTagId}/courses")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public SimplePage<CourseLearningTagDto> getCoursesByTag(@PathVariable Long learningTagId, PageableParams pageable) {
+    public SimplePage<CourseLearningTagResponse> getCoursesByTag(@PathVariable Long learningTagId, PageableParams pageable) {
         return learningTagService.getCoursesByLearningTagId(learningTagId, pageable.getAsPageable());
     }
 
