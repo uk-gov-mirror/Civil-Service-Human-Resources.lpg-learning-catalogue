@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CourseLearningTagResponse {
-    private String uid;
+    private String id;
     private String title;
 }

@@ -200,9 +200,9 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].title").value("Course A"))
-                .andExpect(jsonPath("$.content[0].uid").value("uid-a"))
+                .andExpect(jsonPath("$.content[0].id").value("uid-a"))
                 .andExpect(jsonPath("$.content[1].title").value("Course B"))
-                .andExpect(jsonPath("$.content[1].uid").value("uid-b"))
+                .andExpect(jsonPath("$.content[1].id").value("uid-b"))
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.size").value(2))
                 .andExpect(jsonPath("$.totalResults").value(3));
