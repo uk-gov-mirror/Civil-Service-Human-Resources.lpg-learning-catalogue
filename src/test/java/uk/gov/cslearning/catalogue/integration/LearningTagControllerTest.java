@@ -208,10 +208,15 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.content[1].id").value("uid-b"))
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.size").value(2))
-                .andExpect(jsonPath("$.totalResults").value(3))
                 .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.totalResults").value(3))
                 .andExpect(jsonPath("$.totalPages").value(2))
-                .andExpect(jsonPath("$.sort").exists());
+                .andExpect(jsonPath("$.sort").exists())
+                .andExpect(jsonPath("$.pageable").exists())
+                .andExpect(jsonPath("$.first").value(true))
+                .andExpect(jsonPath("$.last").value(false))
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.numberOfElements").value(2));
     }
 
     @Test
