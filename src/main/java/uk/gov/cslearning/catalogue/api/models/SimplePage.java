@@ -17,10 +17,7 @@ import java.util.stream.Collectors;
         "numberOfElements",
         "first",
         "last",
-        "empty",
-        "totalElements",
-        "totalPages",
-        "sort"
+        "empty"
 })
 public class SimplePage<T> extends PageImpl<T> {
 
