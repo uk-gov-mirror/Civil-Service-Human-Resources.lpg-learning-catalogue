@@ -40,7 +40,10 @@ public class LearningTagService {
         Page<CourseLearningTagEntity> page = courseTagRepository.findByLearningTagIdOrderByCourseTitleAsc(learningTagId, pageable);
         return new SimplePage<>(
                 page.getContent().stream()
-                        .map(entity -> new CourseLearningTagResponse(entity.getCourse().getUid(), entity.getCourse().getTitle()))
+                        .map(entity -> new CourseLearningTagResponse(
+                                entity.getCourse().getUid(),
+                                entity.getCourse().getTitle(),
+                                entity.getCourse().getStatus().getName()))
                         .collect(Collectors.toList()),
                 page.getTotalElements(),
                 pageable);

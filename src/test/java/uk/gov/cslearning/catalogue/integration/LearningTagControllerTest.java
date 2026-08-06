@@ -7,8 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import uk.gov.cslearning.catalogue.domain.CourseEntity;
 import uk.gov.cslearning.catalogue.domain.CourseLearningTagEntity;
+import uk.gov.cslearning.catalogue.domain.CourseStatusEntity;
 import uk.gov.cslearning.catalogue.domain.LearningTag;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
 
@@ -22,6 +24,9 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
     @Autowired
     private ICourseRepository courseRepository;
+
+    @Autowired
+    private ICourseStatusRepository courseStatusRepository;
 
     @Autowired
     private ILearningTagRepository learningTagRepository;
@@ -186,9 +191,10 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     @Test
     @Transactional
     public void testGetCoursesByLearningTag() throws Exception {
-        CourseEntity course1 = courseRepository.save(new CourseEntity("uid-b", "Course B"));
-        CourseEntity course2 = courseRepository.save(new CourseEntity("uid-a", "Course A"));
-        CourseEntity course3 = courseRepository.save(new CourseEntity("uid-c", "Course C"));
+        CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
+        CourseEntity course1 = courseRepository.save(new CourseEntity("uid-b", "Course B", draftStatus));
+        CourseEntity course2 = courseRepository.save(new CourseEntity("uid-a", "Course A", draftStatus));
+        CourseEntity course3 = courseRepository.save(new CourseEntity("uid-c", "Course C", draftStatus));
 
         LearningTag tag = learningTagRepository.findById(1L).get();
 
@@ -201,8 +207,10 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].title").value("Course A"))
                 .andExpect(jsonPath("$.content[0].id").value("uid-a"))
+                .andExpect(jsonPath("$.content[0].status").value("Draft"))
                 .andExpect(jsonPath("$.content[1].title").value("Course B"))
                 .andExpect(jsonPath("$.content[1].id").value("uid-b"))
+                .andExpect(jsonPath("$.content[1].status").value("Draft"))
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.size").value(2))
                 .andExpect(jsonPath("$.totalResults").value(3))

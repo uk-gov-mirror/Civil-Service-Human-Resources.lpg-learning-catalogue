@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class CourseLearningTagResponse {
     private String id;
     private String title;
+    private String status;
 }
