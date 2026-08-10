@@ -236,4 +236,31 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.successfulUpdates[1]").value(2))
                 .andExpect(jsonPath("$.failedUpdates").isEmpty());
     }
+
+    @Test
+    @Transactional
+    public void testAssignCoursesToTag() throws Exception {
+        courseRepository.save(new CourseEntity("uid-existing", "Old Title", courseStatusRepository.findByName("Draft").get()));
+
+        String requestBody = "{" +
+                "\"courses\": [" +
+                "  {\"uid\": \"uid-existing\", \"title\": \"Updated Title\", \"status\": \"Published\"}," +
+                "  {\"uid\": \"uid-new\", \"title\": \"New Course\", \"status\": \"Draft\"}" +
+                "]" +
+                "}";
+
+        mvc.perform(post("/learning-tags/1/courses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
+                        .with(csrf()))
+                .andExpect(status().isCreated());
+
+        mvc.perform(get("/learning-tags/1/courses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[?(@.id=='uid-existing')].title").value("Updated Title"))
+                .andExpect(jsonPath("$.content[?(@.id=='uid-existing')].status").value("Published"))
+                .andExpect(jsonPath("$.content[?(@.id=='uid-new')].title").value("New Course"))
+                .andExpect(jsonPath("$.content[?(@.id=='uid-new')].status").value("Draft"));
+    }
 }

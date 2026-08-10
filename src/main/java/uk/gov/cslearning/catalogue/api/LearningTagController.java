@@ -3,6 +3,7 @@ package uk.gov.cslearning.catalogue.api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import uk.gov.cslearning.catalogue.api.models.CourseLearningTagBulkRequest;
 import uk.gov.cslearning.catalogue.api.models.CourseLearningTagResponse;
 import uk.gov.cslearning.catalogue.api.models.PageableParams;
 import uk.gov.cslearning.catalogue.api.models.SimplePage;
@@ -59,5 +60,9 @@ public class LearningTagController {
         return learningTagService.updateLearningTagState(dto);
     }
 
-
+    @PostMapping("/{learningTagId}/courses")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void assignCoursesToTag(@PathVariable Long learningTagId, @Valid @RequestBody CourseLearningTagBulkRequest request) {
+        learningTagService.assignCoursesToTag(learningTagId, request);
+    }
 }

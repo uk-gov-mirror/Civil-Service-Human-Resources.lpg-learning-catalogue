@@ -3,11 +3,14 @@ package uk.gov.cslearning.catalogue.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import uk.gov.cslearning.catalogue.api.models.CourseLearningTagBulkRequest;
 import uk.gov.cslearning.catalogue.api.models.CourseLearningTagResponse;
 import uk.gov.cslearning.catalogue.api.models.SimplePage;
 import uk.gov.cslearning.catalogue.domain.*;
 import uk.gov.cslearning.catalogue.dto.BulkUpdateDto;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
 
@@ -22,11 +25,17 @@ public class LearningTagService {
 
     private final ILearningTagRepository learningTagRepository;
     private final ICourseTagRepository courseTagRepository;
+    private final ICourseRepository courseRepository;
+    private final ICourseStatusRepository courseStatusRepository;
     private final LearningTagFactory learningTagFactory;
 
-    public LearningTagService(ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository, LearningTagFactory learningTagDtoFactory) {
+    public LearningTagService(ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository,
+                              ICourseRepository courseRepository, ICourseStatusRepository courseStatusRepository,
+                              LearningTagFactory learningTagDtoFactory) {
         this.learningTagRepository = learningTagRepository;
         this.courseTagRepository = courseTagRepository;
+        this.courseRepository = courseRepository;
+        this.courseStatusRepository = courseStatusRepository;
         this.learningTagFactory = learningTagDtoFactory;
     }
 
@@ -90,5 +99,31 @@ public class LearningTagService {
                     }
                 });
         return new BulkUpdateDto(successful, failed);
+    }
+
+    public void assignCoursesToTag(Long learningTagId, CourseLearningTagBulkRequest request) {
+        LearningTag learningTag = learningTagRepository.findById(learningTagId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Learning tag with ID %s not found", learningTagId)));
+
+        request.getCourses().forEach(courseRequest -> {
+            CourseStatusEntity status = courseStatusRepository.findByName(courseRequest.getStatus())
+                    .orElseGet(() -> courseStatusRepository.save(new CourseStatusEntity(courseRequest.getStatus())));
+
+            CourseEntity course = courseRepository.findByUid(courseRequest.getUid())
+                    .map(existingCourse -> {
+                        if (!existingCourse.getTitle().equals(courseRequest.getTitle()) ||
+                                !existingCourse.getStatus().getName().equals(courseRequest.getStatus())) {
+                            existingCourse.setTitle(courseRequest.getTitle());
+                            existingCourse.setStatus(status);
+                            return courseRepository.save(existingCourse);
+                        }
+                        return existingCourse;
+                    })
+                    .orElseGet(() -> courseRepository.save(new CourseEntity(courseRequest.getUid(), courseRequest.getTitle(), status)));
+
+            if (!courseTagRepository.findByLearningTagIdAndCourseId(learningTagId, course.getId()).isPresent()) {
+                courseTagRepository.save(new CourseLearningTagEntity(learningTag, course));
+            }
+        });
     }
 }
