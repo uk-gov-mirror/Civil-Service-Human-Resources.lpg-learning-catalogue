@@ -12,6 +12,7 @@ import uk.gov.cslearning.catalogue.api.v2.model.CourseSearchParameters;
 import uk.gov.cslearning.catalogue.api.v2.model.RequiredLearningIdMap;
 import uk.gov.cslearning.catalogue.domain.CivilServant.CivilServant;
 import uk.gov.cslearning.catalogue.domain.Course;
+import uk.gov.cslearning.catalogue.domain.CourseEntity;
 import uk.gov.cslearning.catalogue.domain.Owner.OwnerFactory;
 import uk.gov.cslearning.catalogue.domain.Status;
 import uk.gov.cslearning.catalogue.domain.module.Audience;
@@ -21,6 +22,8 @@ import uk.gov.cslearning.catalogue.domain.module.Module;
 import uk.gov.cslearning.catalogue.domain.validation.CourseValidator;
 import uk.gov.cslearning.catalogue.exception.CourseCannotByDeletedException;
 import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -46,15 +49,22 @@ public class CourseService {
 
     private final CourseValidator courseValidator;
 
+    private final ICourseRepository iCourseRepository;
+
+    private final ICourseStatusRepository iCourseStatusRepository;
+
     public CourseService(CourseRepository courseRepository,
                          EventService eventService, RegistryService registryService, OwnerFactory ownerFactory,
-                         AuthoritiesService authoritiesService, CourseValidator courseValidator) {
+                         AuthoritiesService authoritiesService, CourseValidator courseValidator,
+                         ICourseRepository iCourseRepository, ICourseStatusRepository iCourseStatusRepository) {
         this.courseRepository = courseRepository;
         this.eventService = eventService;
         this.registryService = registryService;
         this.ownerFactory = ownerFactory;
         this.authoritiesService = authoritiesService;
         this.courseValidator = courseValidator;
+        this.iCourseRepository = iCourseRepository;
+        this.iCourseStatusRepository = iCourseStatusRepository;
     }
 
     public Course save(Course course) {
@@ -88,6 +98,17 @@ public class CourseService {
 
     public Course updateCourse(Course course, Course newCourse) {
         courseValidator.validate(course, newCourse);
+
+        boolean updateSql = false;
+
+        if (!course.getTitle().equals(newCourse.getTitle())) {
+            updateSql = true;
+        }
+
+        if (!course.getStatus().equals(newCourse.getStatus())) {
+            updateSql = true;
+        }
+
         course.setTitle(newCourse.getTitle());
         course.setShortDescription(newCourse.getShortDescription());
         course.setLearningOutcomes(newCourse.getLearningOutcomes());
@@ -107,6 +128,15 @@ public class CourseService {
         }
 
         courseRepository.save(course);
+
+        if (updateSql) {
+            iCourseRepository.findByUid(course.getId()).ifPresent(courseEntity -> {
+                courseEntity.setTitle(course.getTitle());
+                iCourseStatusRepository.findByName(course.getStatus().name()).ifPresent(courseEntity::setStatus);
+                iCourseRepository.save(courseEntity);
+            });
+        }
+
         return course;
     }
 
