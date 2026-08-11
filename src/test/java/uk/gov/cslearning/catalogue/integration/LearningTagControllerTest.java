@@ -1,15 +1,38 @@
 package uk.gov.cslearning.catalogue.integration;
 
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
+import uk.gov.cslearning.catalogue.domain.CourseEntity;
+import uk.gov.cslearning.catalogue.domain.CourseLearningTagEntity;
+import uk.gov.cslearning.catalogue.domain.CourseStatusEntity;
+import uk.gov.cslearning.catalogue.domain.LearningTag;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
+
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class LearningTagControllerTest extends MySQLIntegrationTestBase {
+
+    @Autowired
+    private ICourseRepository courseRepository;
+
+    @Autowired
+    private ICourseStatusRepository courseStatusRepository;
+
+    @Autowired
+    private ILearningTagRepository learningTagRepository;
+
+    @Autowired
+    private ICourseTagRepository courseTagRepository;
 
     @Test
     public void testGetLearningTags() throws Exception {
@@ -163,6 +186,42 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.updatedTimestamp").value("2025-01-01T10:00:00"))
                 .andExpect(jsonPath("$.archived").value(false))
                 .andExpect(jsonPath("$.category").value(true));
+    }
+
+    @Test
+    @Transactional
+    public void testGetCoursesByLearningTag() throws Exception {
+        CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
+        CourseEntity course1 = courseRepository.save(new CourseEntity("uid-b", "Course B", draftStatus));
+        CourseEntity course2 = courseRepository.save(new CourseEntity("uid-a", "Course A", draftStatus));
+        CourseEntity course3 = courseRepository.save(new CourseEntity("uid-c", "Course C", draftStatus));
+
+        LearningTag tag = learningTagRepository.findById(1L).get();
+
+        courseTagRepository.save(new CourseLearningTagEntity(tag, course1));
+        courseTagRepository.save(new CourseLearningTagEntity(tag, course2));
+        courseTagRepository.save(new CourseLearningTagEntity(tag, course3));
+
+        mvc.perform(get("/learning-tags/1/courses?page=0&size=2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].title").value("Course A"))
+                .andExpect(jsonPath("$.content[0].id").value("uid-a"))
+                .andExpect(jsonPath("$.content[0].status").value("Draft"))
+                .andExpect(jsonPath("$.content[1].title").value("Course B"))
+                .andExpect(jsonPath("$.content[1].id").value("uid-b"))
+                .andExpect(jsonPath("$.content[1].status").value("Draft"))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(2))
+                .andExpect(jsonPath("$.totalResults").value(3))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.numberOfElements").value(2))
+                .andExpect(jsonPath("$.first").value(true))
+                .andExpect(jsonPath("$.last").value(false))
+                .andExpect(jsonPath("$.empty").value(false))
+                .andExpect(jsonPath("$.pageable").exists())
+                .andExpect(jsonPath("$.number").value(0));
     }
 
     @Test

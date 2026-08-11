@@ -26,6 +26,8 @@ import uk.gov.cslearning.catalogue.domain.module.LinkModule;
 import uk.gov.cslearning.catalogue.domain.module.Module;
 import uk.gov.cslearning.catalogue.domain.validation.CourseValidator;
 import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -71,6 +73,12 @@ public class CourseServiceTest {
 
     @Mock
     private CourseValidator courseValidator;
+
+    @Mock
+    private ICourseRepository iCourseRepository;
+
+    @Mock
+    private ICourseStatusRepository iCourseStatusRepository;
 
     @InjectMocks
     private CourseService courseService;
@@ -171,8 +179,9 @@ public class CourseServiceTest {
 
     @Test
     public void shouldUpdateCourse() throws MalformedURLException {
+        String courseId = "course-id";
         Course course = new Course();
-
+        course.setId(courseId);
         course.setTitle("title1");
         course.setShortDescription("sd1");
         course.setDescription("sd1");
@@ -224,9 +233,17 @@ public class CourseServiceTest {
         Status archived = Status.ARCHIVED;
         newCourse.setStatus(archived);
 
+        uk.gov.cslearning.catalogue.domain.CourseEntity courseEntity = mock(uk.gov.cslearning.catalogue.domain.CourseEntity.class);
+        when(iCourseRepository.findByUid(courseId)).thenReturn(Optional.of(courseEntity));
+        when(iCourseStatusRepository.findByName(archived.name())).thenReturn(Optional.of(new uk.gov.cslearning.catalogue.domain.CourseStatusEntity(archived.name())));
+
         Course savedCourse = courseService.updateCourse(course, newCourse);
 
         verify(courseRepository).save(any());
+        verify(iCourseRepository).findByUid(courseId);
+        verify(courseEntity).setTitle(newTitle);
+        verify(courseEntity).setStatus(any());
+        verify(iCourseRepository).save(courseEntity);
 
         assertEquals(newTitle, savedCourse.getTitle());
         assertEquals(newShortDescription, savedCourse.getShortDescription());

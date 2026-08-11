@@ -3,12 +3,12 @@ package uk.gov.cslearning.catalogue.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import uk.gov.cslearning.catalogue.api.models.CourseLearningTagResponse;
 import uk.gov.cslearning.catalogue.api.models.SimplePage;
-import uk.gov.cslearning.catalogue.domain.LearningTag;
-import uk.gov.cslearning.catalogue.domain.LearningTagBulkStateDto;
-import uk.gov.cslearning.catalogue.domain.LearningTagDto;
+import uk.gov.cslearning.catalogue.domain.*;
 import uk.gov.cslearning.catalogue.dto.BulkUpdateDto;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
 
 import javax.validation.Valid;
@@ -21,10 +21,12 @@ import java.util.stream.Collectors;
 public class LearningTagService {
 
     private final ILearningTagRepository learningTagRepository;
+    private final ICourseTagRepository courseTagRepository;
     private final LearningTagFactory learningTagFactory;
 
-    public LearningTagService(ILearningTagRepository learningTagRepository, LearningTagFactory learningTagDtoFactory) {
+    public LearningTagService(ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository, LearningTagFactory learningTagDtoFactory) {
         this.learningTagRepository = learningTagRepository;
+        this.courseTagRepository = courseTagRepository;
         this.learningTagFactory = learningTagDtoFactory;
     }
 
@@ -32,6 +34,19 @@ public class LearningTagService {
         Page<LearningTag> page = learningTagRepository.findAll(pageable);
         return new SimplePage<>(page.getContent().stream().map(learningTagFactory::createDto).collect(Collectors.toList()),
                 page.getTotalElements(), pageable);
+    }
+
+    public SimplePage<CourseLearningTagResponse> getCoursesByLearningTagId(Long learningTagId, Pageable pageable) {
+        Page<CourseLearningTagEntity> page = courseTagRepository.findByLearningTagIdOrderByCourseTitleAsc(learningTagId, pageable);
+        return new SimplePage<>(
+                page.getContent().stream()
+                        .map(entity -> new CourseLearningTagResponse(
+                                entity.getCourse().getUid(),
+                                entity.getCourse().getTitle(),
+                                entity.getCourse().getStatus().getName()))
+                        .collect(Collectors.toList()),
+                page.getTotalElements(),
+                pageable);
     }
 
     public LearningTagDto createLearningTag(@Valid LearningTagDto learningTagDto) {

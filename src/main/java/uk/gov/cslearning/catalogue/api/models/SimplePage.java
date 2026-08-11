@@ -14,10 +14,7 @@ import java.util.stream.Collectors;
 @JsonIgnoreProperties({
         "pageable",
         "number",
-        "numberOfElements",
-        "first",
-        "last",
-        "empty"
+        "numberOfElements"
 })
 public class SimplePage<T> extends PageImpl<T> {
 
@@ -41,6 +38,14 @@ public class SimplePage<T> extends PageImpl<T> {
 
     public int getPage() {
         return getNumber();
+    }
+
+    public long getTotalElements() {
+        return super.getTotalElements();
+    }
+
+    public long getTotalResults() {
+        return getTotalElements();
     }
 
     @JsonProperty("sort")
