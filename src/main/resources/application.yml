@@ -1,15 +1,30 @@
-
+database:
+  host: ${DATABASE_HOST:jdbc:mysql://localhost:3306}
+  name: ${DATABASE_NAME:learning_catalogue}
+  use-ssl: ${DATABASE_USESSL:false}
 spring:
   jackson:
     serialization:
       write_dates_as_timestamps: false
   resources:
     add-mappings: false
+  datasource:
+    url: ${DATASOURCE_URL:${database.host}/${database.name}?useSSL=${database.use-ssl}&requireSSL=false}
+    username: ${DATASOURCE_USERNAME:root}
+    password: ${DATASOURCE_PASSWORD:my-secret-pw}
+    platform: mysql
+    hikari:
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  flyway:
+    locations: classpath:db/migration/{vendor}
   servlet:
     multipart:
       max-file-size: 5120MB
       max-request-size: 5120MB
-
+time:
+  zoneId: ${TIME_ZONE_ID:UTC}
 server:
   port: 9001
 
@@ -72,8 +87,6 @@ record:
 registry:
   serviceUrl: ${REGISTRY_SERVICE_URL:http://localhost:9002}
   getCurrentUrl: "${registry.serviceUrl}/civilServants/me"
-  getOrganisationalUnit: "${registry.serviceUrl}/organisationalUnits/parent/%s"
-  getAllCodes: "${registry.serviceUrl}/organisationalUnits/allCodesMap"
 
 oauth:
   serviceUrl: ${OAUTH_SERVICE_URL:http://localhost:8080}

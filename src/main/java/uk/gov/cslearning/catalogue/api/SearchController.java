@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.cslearning.catalogue.Utils;
 import uk.gov.cslearning.catalogue.api.v2.model.CourseSearchParameters;
 import uk.gov.cslearning.catalogue.domain.CivilServant.CivilServant;
-import uk.gov.cslearning.catalogue.repository.CourseRepository;
+import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.service.AuthoritiesService;
 import uk.gov.cslearning.catalogue.service.RegistryService;
 

@@ -4,10 +4,11 @@ import java.util.NoSuchElementException;
 
 public class ResourceNotFoundException extends NoSuchElementException {
 
-    private ResourceNotFoundException() {
+    public ResourceNotFoundException() {
+        super();
     }
 
-    public static ResourceNotFoundException resourceNotFoundException() {
-        return new ResourceNotFoundException();
+    public ResourceNotFoundException(String s) {
+        super(s);
     }
 }

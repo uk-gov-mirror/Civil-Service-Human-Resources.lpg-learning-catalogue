@@ -1,4 +1,4 @@
-package uk.gov.cslearning.catalogue.repository;
+package uk.gov.cslearning.catalogue.repository.elastic;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -10,7 +10,7 @@ import uk.gov.cslearning.catalogue.domain.Media;
 import uk.gov.cslearning.catalogue.dto.rustici.course.Course;
 import uk.gov.cslearning.catalogue.dto.rustici.course.CreateCourse;
 import uk.gov.cslearning.catalogue.dto.rustici.course.CreateCourseResponse;
-import uk.gov.cslearning.catalogue.repository.MediaRepository;
+import uk.gov.cslearning.catalogue.repository.elastic.MediaRepository;
 
 import java.util.Optional;
 

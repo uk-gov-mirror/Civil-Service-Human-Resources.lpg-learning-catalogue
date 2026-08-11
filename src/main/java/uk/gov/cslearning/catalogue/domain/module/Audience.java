@@ -7,7 +7,6 @@ import org.springframework.data.elasticsearch.annotations.Field;
 
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.springframework.data.elasticsearch.annotations.FieldType.Date;
@@ -32,7 +31,7 @@ public class Audience {
     private Set<String> grades = new HashSet<>();
 
     private Set<String> interests = new HashSet<>();
-    
+
     @Field(type = Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss")
     private Instant requiredBy;
 
@@ -50,8 +49,4 @@ public class Audience {
         return type != null && type.equals(Type.REQUIRED_LEARNING) && requiredBy != null;
     }
 
-    @JsonIgnore
-    public boolean isRequiredForDepartments(List<String> departments) {
-        return this.isRequired() && departments.stream().anyMatch(departmentCode -> this.getDepartments().contains(departmentCode));
-    }
 }

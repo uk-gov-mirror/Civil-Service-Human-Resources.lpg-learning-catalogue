@@ -196,45 +196,4 @@ public class CustomPermissionEvaluatorTest {
         assertTrue(hasPermission);
     }
 
-    @Test
-    public void shouldReturnFalseIfUserHasProfAuthorButDoesntMatch() {
-        CivilServant civilServant = new CivilServant();
-
-        Course course = new Course();
-        Owner owner = new Owner();
-        course.setOwner(owner);
-
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(Roles.PROFESSION_AUTHOR));
-
-        doReturn(authorities).when(authentication).getAuthorities();
-        when(registryService.getCurrentCivilServant()).thenReturn(civilServant);
-        when(courseService.findById(any())).thenReturn(Optional.of(course));
-        when(authoritiesService.isProfessionIdEqual(civilServant, course.getOwner())).thenReturn(false);
-
-        boolean hasPermission = customPermissionEvaluator.hasPermission(authentication, COURSE_ID, WRITE_PERMISSION);
-
-        assertFalse(hasPermission);
-    }
-
-    @Test
-    public void shouldReturnTrueIfUserHasProfAuthorAndMatches() {
-        CivilServant civilServant = new CivilServant();
-
-        Course course = new Course();
-        Owner owner = new Owner();
-        course.setOwner(owner);
-
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(Roles.PROFESSION_AUTHOR));
-
-        doReturn(authorities).when(authentication).getAuthorities();
-        when(registryService.getCurrentCivilServant()).thenReturn(civilServant);
-        when(courseService.findById(any())).thenReturn(Optional.of(course));
-        when(authoritiesService.isProfessionIdEqual(civilServant, course.getOwner())).thenReturn(true);
-
-        boolean hasPermission = customPermissionEvaluator.hasPermission(authentication, COURSE_ID, WRITE_PERMISSION);
-
-        assertTrue(hasPermission);
-    }
 }

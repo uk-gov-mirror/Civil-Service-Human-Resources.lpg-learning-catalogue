@@ -14,7 +14,7 @@ import uk.gov.cslearning.catalogue.dto.ModuleDto;
 import uk.gov.cslearning.catalogue.dto.factory.CourseDtoFactory;
 import uk.gov.cslearning.catalogue.dto.factory.ModuleDtoFactory;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
-import uk.gov.cslearning.catalogue.repository.CourseRepository;
+import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.service.rustici.RusticiEngineService;
 import uk.gov.cslearning.catalogue.service.upload.FileUploadService;
 import uk.gov.cslearning.catalogue.service.upload.FileUploadServiceFactory;
@@ -25,7 +25,8 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -115,7 +116,7 @@ public class ModuleServiceTest {
         newModule.setTitle(updatedTitle);
         when(courseService.getCourseById(courseId)).thenReturn(course);
         moduleService.updateModule(courseId, newModule);
-        assertEquals(course.getModuleById(moduleId).orElseThrow(ResourceNotFoundException::resourceNotFoundException).getTitle(), updatedTitle);
+        assertEquals(course.getModuleById(moduleId).orElseThrow(ResourceNotFoundException::new).getTitle(), updatedTitle);
     }
 
     @Test

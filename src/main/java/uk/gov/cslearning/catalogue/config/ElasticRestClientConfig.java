@@ -31,7 +31,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Configuration
-@EnableElasticsearchRepositories(basePackages = "uk.gov.cslearning.catalogue.repository")
+@EnableElasticsearchRepositories(basePackages = "uk.gov.cslearning.catalogue.repository.elastic")
 public class ElasticRestClientConfig extends AbstractElasticsearchConfiguration {
 
     @Value("${elasticsearch.protocol}")
@@ -100,7 +100,7 @@ public class ElasticRestClientConfig extends AbstractElasticsearchConfiguration 
     }
 
     @ReadingConverter
-    public class StringToZonedDateTimeConverter implements Converter<String, LocalDateTime>  {
+    public class StringToZonedDateTimeConverter implements Converter<String, LocalDateTime> {
 
         @Override
         public LocalDateTime convert(@NotNull String source) {
@@ -118,7 +118,7 @@ public class ElasticRestClientConfig extends AbstractElasticsearchConfiguration 
     }
 
     @ReadingConverter
-    public class StringToURLConverter implements Converter<String, URL>  {
+    public class StringToURLConverter implements Converter<String, URL> {
 
         @SneakyThrows
         @Override
@@ -137,7 +137,7 @@ public class ElasticRestClientConfig extends AbstractElasticsearchConfiguration 
     }
 
     @ReadingConverter
-    public class StringtoStatusConverter implements Converter<String, Status>  {
+    public class StringtoStatusConverter implements Converter<String, Status> {
 
         @SneakyThrows
         @Override
@@ -156,7 +156,7 @@ public class ElasticRestClientConfig extends AbstractElasticsearchConfiguration 
     }
 
     @ReadingConverter
-    public class StringtoEventStatusConverter implements Converter<String, EventStatus>  {
+    public class StringtoEventStatusConverter implements Converter<String, EventStatus> {
 
         @SneakyThrows
         @Override

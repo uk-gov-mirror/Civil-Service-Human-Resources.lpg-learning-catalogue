@@ -13,7 +13,7 @@ import uk.gov.cslearning.catalogue.domain.module.*;
 import uk.gov.cslearning.catalogue.dto.CourseDto;
 import uk.gov.cslearning.catalogue.dto.EventDto;
 import uk.gov.cslearning.catalogue.dto.ModuleDto;
-import uk.gov.cslearning.catalogue.repository.CourseRepository;
+import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.service.record.LearnerRecordService;
 
 import java.util.*;

@@ -1,4 +1,4 @@
-package uk.gov.cslearning.catalogue.repository;
+package uk.gov.cslearning.catalogue.repository.elastic;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Repository
-public interface CourseRepository extends ElasticsearchRepository<Course, String>, CourseSearchRepository, CourseSuggestionsRepository {
+public interface CourseRepository extends ElasticsearchRepository<Course, String>, CourseSearchRepository {
 
     @Query("{\n" +
             "    \"bool\": {\n" +
