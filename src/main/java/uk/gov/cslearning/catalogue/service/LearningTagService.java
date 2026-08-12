@@ -3,11 +3,14 @@ package uk.gov.cslearning.catalogue.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import uk.gov.cslearning.catalogue.api.models.CourseBulkUpdateResponse;
+import uk.gov.cslearning.catalogue.api.models.CourseIdsDto;
 import uk.gov.cslearning.catalogue.api.models.CourseLearningTagResponse;
 import uk.gov.cslearning.catalogue.api.models.SimplePage;
 import uk.gov.cslearning.catalogue.domain.*;
 import uk.gov.cslearning.catalogue.dto.BulkUpdateDto;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
 
@@ -22,11 +25,13 @@ public class LearningTagService {
 
     private final ILearningTagRepository learningTagRepository;
     private final ICourseTagRepository courseTagRepository;
+    private final ICourseRepository courseRepository;
     private final LearningTagFactory learningTagFactory;
 
-    public LearningTagService(ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository, LearningTagFactory learningTagDtoFactory) {
+    public LearningTagService(ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository, ICourseRepository courseRepository, LearningTagFactory learningTagDtoFactory) {
         this.learningTagRepository = learningTagRepository;
         this.courseTagRepository = courseTagRepository;
+        this.courseRepository = courseRepository;
         this.learningTagFactory = learningTagDtoFactory;
     }
 
@@ -90,5 +95,30 @@ public class LearningTagService {
                     }
                 });
         return new BulkUpdateDto(successful, failed);
+    }
+
+    public CourseBulkUpdateResponse removeCoursesFromLearningTag(Long learningTagId, CourseIdsDto courseIdsDto) {
+        List<String> successful = new ArrayList<>();
+        List<String> failed = new ArrayList<>();
+
+        LearningTag learningTag = learningTagRepository.findById(learningTagId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Learning tag with ID %s not found", learningTagId)));
+
+        courseIdsDto.getIds().forEach(courseUid -> {
+            try {
+                CourseEntity course = courseRepository.findByUid(courseUid)
+                        .orElseThrow(() -> new ResourceNotFoundException(String.format("Course with UID %s not found", courseUid)));
+
+                CourseLearningTagId id = new CourseLearningTagId(learningTag.getId(), course.getId());
+                if (courseTagRepository.existsById(id)) {
+                    courseTagRepository.deleteById(id);
+                }
+                successful.add(courseUid);
+            } catch (Exception e) {
+                failed.add(courseUid);
+            }
+        });
+
+        return new CourseBulkUpdateResponse(successful, failed);
     }
 }
