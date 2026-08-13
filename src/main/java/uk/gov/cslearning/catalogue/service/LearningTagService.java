@@ -1,14 +1,18 @@
 package uk.gov.cslearning.catalogue.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import uk.gov.cslearning.catalogue.api.models.CourseBulkUpdateResponse;
+import uk.gov.cslearning.catalogue.api.models.CourseIdsDto;
 import uk.gov.cslearning.catalogue.api.models.CourseLearningTagBulkRequest;
 import uk.gov.cslearning.catalogue.api.models.CourseLearningTagResponse;
 import uk.gov.cslearning.catalogue.api.models.SimplePage;
 import uk.gov.cslearning.catalogue.domain.*;
 import uk.gov.cslearning.catalogue.dto.BulkUpdateDto;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
+import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
@@ -20,20 +24,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class LearningTagService {
 
     private final ILearningTagRepository learningTagRepository;
     private final ICourseTagRepository courseTagRepository;
     private final ICourseRepository courseRepository;
+    private final ICourseRepository courseRepository;
     private final ICourseStatusRepository courseStatusRepository;
     private final LearningTagFactory learningTagFactory;
 
+    public LearningTagService(ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository, ICourseRepository courseRepository, LearningTagFactory learningTagDtoFactory) {
     public LearningTagService(ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository,
                               ICourseRepository courseRepository, ICourseStatusRepository courseStatusRepository,
                               LearningTagFactory learningTagDtoFactory) {
         this.learningTagRepository = learningTagRepository;
         this.courseTagRepository = courseTagRepository;
+        this.courseRepository = courseRepository;
         this.courseRepository = courseRepository;
         this.courseStatusRepository = courseStatusRepository;
         this.learningTagFactory = learningTagDtoFactory;
@@ -99,6 +107,39 @@ public class LearningTagService {
                     }
                 });
         return new BulkUpdateDto(successful, failed);
+    }
+
+    public CourseBulkUpdateResponse removeCoursesFromLearningTag(Long learningTagId, CourseIdsDto courseIdsDto) {
+        LearningTag learningTag = learningTagRepository.findById(learningTagId)
+                .orElseThrow(() -> {
+                    log.error("Learning tag with ID {} not found", learningTagId);
+                    return new ResourceNotFoundException(String.format("Learning tag with ID %s not found", learningTagId));
+                });
+
+        List<String> successful = new ArrayList<>();
+        List<String> failed = new ArrayList<>();
+
+        courseIdsDto.getIds().forEach(courseUid -> {
+            try {
+                CourseEntity course = courseRepository.findByUid(courseUid)
+                        .orElseThrow(() -> {
+                            log.error("Course with UID {} not found", courseUid);
+                            return new ResourceNotFoundException(String.format("Course with UID %s not found", courseUid));
+                        });
+                CourseLearningTagId id = new CourseLearningTagId(learningTag.getId(), course.getId());
+                if (courseTagRepository.existsById(id)) {
+                    courseTagRepository.deleteById(id);
+                    successful.add(courseUid);
+                } else {
+                    log.error("Course with UID {} is not linked with the Learning tag with ID {}", courseUid, learningTagId);
+                    throw new ResourceNotFoundException(String.format("Course with UID %s is not linked with the Learning tag with ID %s", courseUid, learningTagId));
+                }
+            } catch (Exception e) {
+                failed.add(courseUid);
+            }
+        });
+
+        return new CourseBulkUpdateResponse(successful, failed);
     }
 
     public void assignCoursesToTag(Long learningTagId, CourseLearningTagBulkRequest request) {

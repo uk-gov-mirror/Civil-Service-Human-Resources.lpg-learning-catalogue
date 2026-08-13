@@ -239,6 +239,29 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
     @Test
     @Transactional
+    public void testRemoveCoursesFromLearningTag() throws Exception {
+        CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
+        CourseEntity course1 = courseRepository.save(new CourseEntity("uid-1", "Course 1", draftStatus));
+        CourseEntity course2 = courseRepository.save(new CourseEntity("uid-2", "Course 2", draftStatus));
+
+        LearningTag tag = learningTagRepository.findById(1L).get();
+
+        courseTagRepository.save(new CourseLearningTagEntity(tag, course1));
+        courseTagRepository.save(new CourseLearningTagEntity(tag, course2));
+
+        mvc.perform(delete("/learning-tags/1/courses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"ids\": [\"uid-1\", \"uid-2\", \"non-existent\"]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.successful_ids", hasSize(2)))
+                .andExpect(jsonPath("$.successful_ids[0]").value("uid-1"))
+                .andExpect(jsonPath("$.successful_ids[1]").value("uid-2"))
+                .andExpect(jsonPath("$.failed_ids", hasSize(1)))
+                .andExpect(jsonPath("$.failed_ids[0]").value("non-existent"));
+    }
+
+    @Test
+    @Transactional
     public void testAssignCoursesToTag() throws Exception {
         courseRepository.save(new CourseEntity("uid-existing", "Old Title", courseStatusRepository.findByName("Draft").get()));
 
