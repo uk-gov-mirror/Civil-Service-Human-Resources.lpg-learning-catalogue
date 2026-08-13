@@ -149,7 +149,7 @@ public class LearningTagService {
                         Optional<Course> elasticCourseOptional = elasticCourseRepository.findById(courseUid);
 
                         if (!elasticCourseOptional.isPresent()) {
-                            log.error("Course with UID {} not found in ElasticSearch, skipping", courseUid);
+                            log.error("Course with UID {} not found in ElasticSearch. Skipping", courseUid);
                             return null;
                         }
 
@@ -163,7 +163,9 @@ public class LearningTagService {
 
             if (course != null) {
                 learningTags.forEach(learningTag -> {
-                    if (!courseTagRepository.findByLearningTagIdAndCourseId(learningTag.getId(), course.getId()).isPresent()) {
+                    if (courseTagRepository.findByLearningTagIdAndCourseId(learningTag.getId(), course.getId()).isPresent()) {
+                        log.info("CourseId {} is already assigned to learningTagId {}. Skipping", course.getId(),  learningTag.getId());
+                    } else {
                         courseTagRepository.save(new CourseLearningTagEntity(learningTag, course));
                     }
                 });
