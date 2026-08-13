@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.cslearning.catalogue.api.models.*;
-import uk.gov.cslearning.catalogue.api.models.CourseLearningTagBulkRequest;
 import uk.gov.cslearning.catalogue.api.models.CourseLearningTagResponse;
 import uk.gov.cslearning.catalogue.api.models.PageableParams;
 import uk.gov.cslearning.catalogue.api.models.SimplePage;

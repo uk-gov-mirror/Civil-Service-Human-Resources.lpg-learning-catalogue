@@ -9,6 +9,7 @@ import uk.gov.cslearning.catalogue.domain.CourseEntity;
 import uk.gov.cslearning.catalogue.domain.CourseLearningTagEntity;
 import uk.gov.cslearning.catalogue.domain.CourseStatusEntity;
 import uk.gov.cslearning.catalogue.domain.LearningTag;
+import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
@@ -35,7 +36,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     private ICourseTagRepository courseTagRepository;
 
     @Autowired
-    private uk.gov.cslearning.catalogue.repository.elastic.CourseRepository elasticCourseRepository;
+    private CourseRepository elasticCourseRepository;
 
     @Test
     public void testGetLearningTags() throws Exception {
@@ -267,8 +268,6 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     @Transactional
     public void testAssignCoursesToTag() throws Exception {
         CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
-//        CourseStatusEntity publishedStatus = courseStatusRepository.findByName("Published")
-//                .orElseGet(() -> courseStatusRepository.save(new CourseStatusEntity("Published")));
 
         courseRepository.save(new CourseEntity("uid-existing", "Old Title", draftStatus));
 
