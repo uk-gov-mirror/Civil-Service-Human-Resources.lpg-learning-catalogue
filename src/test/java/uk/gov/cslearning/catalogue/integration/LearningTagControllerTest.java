@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
-import uk.gov.cslearning.catalogue.domain.CourseEntity;
-import uk.gov.cslearning.catalogue.domain.CourseLearningTagEntity;
-import uk.gov.cslearning.catalogue.domain.CourseStatusEntity;
-import uk.gov.cslearning.catalogue.domain.LearningTag;
+import uk.gov.cslearning.catalogue.domain.*;
 import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
@@ -271,10 +268,10 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
         courseRepository.save(new CourseEntity("uid-existing", "Old Title", draftStatus));
 
-        uk.gov.cslearning.catalogue.domain.Course elasticCourse = new uk.gov.cslearning.catalogue.domain.Course();
+        Course elasticCourse = new Course();
         elasticCourse.setId("uid-new");
         elasticCourse.setTitle("New Course");
-        elasticCourse.setStatus(uk.gov.cslearning.catalogue.domain.Status.DRAFT);
+        elasticCourse.setStatus(Status.DRAFT);
 
         org.mockito.Mockito.when(elasticCourseRepository.findById("uid-new")).thenReturn(java.util.Optional.of(elasticCourse));
         org.mockito.Mockito.when(elasticCourseRepository.findById("uid-missing")).thenReturn(java.util.Optional.empty());
