@@ -4,14 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import uk.gov.cslearning.catalogue.api.models.CourseBulkUpdateResponse;
-import uk.gov.cslearning.catalogue.api.models.CourseIdsDto;
-import uk.gov.cslearning.catalogue.api.models.CourseLearningTagBulkRequest;
-import uk.gov.cslearning.catalogue.api.models.CourseLearningTagResponse;
-import uk.gov.cslearning.catalogue.api.models.SimplePage;
+import uk.gov.cslearning.catalogue.api.models.*;
 import uk.gov.cslearning.catalogue.domain.*;
 import uk.gov.cslearning.catalogue.dto.BulkUpdateDto;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
+import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
@@ -32,15 +29,17 @@ public class LearningTagService {
     private final ICourseRepository courseRepository;
     private final ICourseStatusRepository courseStatusRepository;
     private final LearningTagFactory learningTagFactory;
+    private final CourseRepository elasticCourseRepository;
 
     public LearningTagService(ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository,
                               ICourseRepository courseRepository, ICourseStatusRepository courseStatusRepository,
-                              LearningTagFactory learningTagDtoFactory) {
+                              LearningTagFactory learningTagDtoFactory, CourseRepository elasticCourseRepository) {
         this.learningTagRepository = learningTagRepository;
         this.courseTagRepository = courseTagRepository;
         this.courseRepository = courseRepository;
         this.courseStatusRepository = courseStatusRepository;
         this.learningTagFactory = learningTagDtoFactory;
+        this.elasticCourseRepository = elasticCourseRepository;
     }
 
     public SimplePage<LearningTagDto> getLearningTags(Pageable pageable) {
@@ -141,26 +140,33 @@ public class LearningTagService {
         return new CourseBulkUpdateResponse(successful, failed);
     }
 
-    public void assignCoursesToTag(Long learningTagId, CourseLearningTagBulkRequest request) {
-        LearningTag learningTag = getLearningTagById(learningTagId);
-        request.getCourses().forEach(courseRequest -> {
-            CourseStatusEntity status = courseStatusRepository.findByName(courseRequest.getStatus())
-                    .orElseGet(() -> courseStatusRepository.save(new CourseStatusEntity(courseRequest.getStatus())));
+    public void assignCoursesToTag(LearningTagCourseBulkRequest request) {
+        List<LearningTag> learningTags = learningTagRepository.findAllById(request.getLearningTagIds());
 
-            CourseEntity course = courseRepository.findByUid(courseRequest.getUid())
-                    .map(existingCourse -> {
-                        if (!existingCourse.getTitle().equals(courseRequest.getTitle()) ||
-                                !existingCourse.getStatus().getName().equals(courseRequest.getStatus())) {
-                            existingCourse.setTitle(courseRequest.getTitle());
-                            existingCourse.setStatus(status);
-                            return courseRepository.save(existingCourse);
+        request.getCourseIds().forEach(courseUid -> {
+            CourseEntity course = courseRepository.findByUid(courseUid)
+                    .orElseGet(() -> {
+                        Optional<Course> elasticCourseOptional = elasticCourseRepository.findById(courseUid);
+
+                        if (!elasticCourseOptional.isPresent()) {
+                            log.error("Course with UID {} not found in ElasticSearch, skipping", courseUid);
+                            return null;
                         }
-                        return existingCourse;
-                    })
-                    .orElseGet(() -> courseRepository.save(new CourseEntity(courseRequest.getUid(), courseRequest.getTitle(), status)));
 
-            if (!courseTagRepository.findByLearningTagIdAndCourseId(learningTagId, course.getId()).isPresent()) {
-                courseTagRepository.save(new CourseLearningTagEntity(learningTag, course));
+                        Course elasticCourse = elasticCourseOptional.get();
+
+                        CourseStatusEntity status = courseStatusRepository.findByName(elasticCourse.getStatus().getValue())
+                                .orElseGet(() -> courseStatusRepository.save(new CourseStatusEntity(elasticCourse.getStatus().getValue())));
+
+                        return courseRepository.save(new CourseEntity(elasticCourse.getId(), elasticCourse.getTitle(), status));
+                    });
+
+            if (course != null) {
+                learningTags.forEach(learningTag -> {
+                    if (!courseTagRepository.findByLearningTagIdAndCourseId(learningTag.getId(), course.getId()).isPresent()) {
+                        courseTagRepository.save(new CourseLearningTagEntity(learningTag, course));
+                    }
+                });
             }
         });
     }

@@ -34,6 +34,9 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     @Autowired
     private ICourseTagRepository courseTagRepository;
 
+    @Autowired
+    private uk.gov.cslearning.catalogue.repository.elastic.CourseRepository elasticCourseRepository;
+
     @Test
     public void testGetLearningTags() throws Exception {
 
@@ -263,27 +266,45 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     @Test
     @Transactional
     public void testAssignCoursesToTag() throws Exception {
-        courseRepository.save(new CourseEntity("uid-existing", "Old Title", courseStatusRepository.findByName("Draft").get()));
+        CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
+//        CourseStatusEntity publishedStatus = courseStatusRepository.findByName("Published")
+//                .orElseGet(() -> courseStatusRepository.save(new CourseStatusEntity("Published")));
+
+        courseRepository.save(new CourseEntity("uid-existing", "Old Title", draftStatus));
+
+        uk.gov.cslearning.catalogue.domain.Course elasticCourse = new uk.gov.cslearning.catalogue.domain.Course();
+        elasticCourse.setId("uid-new");
+        elasticCourse.setTitle("New Course");
+        elasticCourse.setStatus(uk.gov.cslearning.catalogue.domain.Status.DRAFT);
+
+        org.mockito.Mockito.when(elasticCourseRepository.findById("uid-new")).thenReturn(java.util.Optional.of(elasticCourse));
+        org.mockito.Mockito.when(elasticCourseRepository.findById("uid-missing")).thenReturn(java.util.Optional.empty());
 
         String requestBody = "{" +
-                "\"courses\": [" +
-                "  {\"uid\": \"uid-existing\", \"title\": \"Updated Title\", \"status\": \"Published\"}," +
-                "  {\"uid\": \"uid-new\", \"title\": \"New Course\", \"status\": \"Draft\"}" +
-                "]" +
+                "\"learningTagIds\": [1, 2]," +
+                "\"courseIds\": [\"uid-existing\", \"uid-new\", \"uid-missing\"]" +
                 "}";
 
-        mvc.perform(post("/learning-tags/1/courses")
+        mvc.perform(post("/learning-tags/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody)
                         .with(csrf()))
                 .andExpect(status().isCreated());
 
+        // Verify tags for uid-existing
         mvc.perform(get("/learning-tags/1/courses"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[?(@.id=='uid-existing')].title").value("Updated Title"))
-                .andExpect(jsonPath("$.content[?(@.id=='uid-existing')].status").value("Published"))
-                .andExpect(jsonPath("$.content[?(@.id=='uid-new')].title").value("New Course"))
-                .andExpect(jsonPath("$.content[?(@.id=='uid-new')].status").value("Draft"));
+                .andExpect(jsonPath("$.content[?(@.id=='uid-existing')]").exists());
+        mvc.perform(get("/learning-tags/2/courses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[?(@.id=='uid-existing')]").exists());
+
+        // Verify tags for uid-new
+        mvc.perform(get("/learning-tags/1/courses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[?(@.id=='uid-new')]").exists());
+        mvc.perform(get("/learning-tags/2/courses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[?(@.id=='uid-new')]").exists());
     }
 }

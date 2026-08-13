@@ -68,9 +68,9 @@ public class LearningTagController {
         return learningTagService.removeCoursesFromLearningTag(learningTagId, courseIdsDto);
     }
 
-    @PostMapping("/{learningTagId}/courses")
+    @PostMapping("/courses")
     @ResponseStatus(HttpStatus.CREATED)
-    public void assignCoursesToTag(@PathVariable Long learningTagId, @Valid @RequestBody CourseLearningTagBulkRequest request) {
-        learningTagService.assignCoursesToTag(learningTagId, request);
+    public void assignCoursesToTag(@Valid @RequestBody LearningTagCourseBulkRequest request) {
+        learningTagService.assignCoursesToTag(request);
     }
 }
