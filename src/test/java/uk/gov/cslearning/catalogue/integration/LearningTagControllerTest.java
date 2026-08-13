@@ -13,6 +13,7 @@ import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -273,8 +274,8 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
         elasticCourse.setTitle("New Course");
         elasticCourse.setStatus(Status.DRAFT);
 
-        org.mockito.Mockito.when(elasticCourseRepository.findById("uid-new")).thenReturn(java.util.Optional.of(elasticCourse));
-        org.mockito.Mockito.when(elasticCourseRepository.findById("uid-missing")).thenReturn(java.util.Optional.empty());
+        when(elasticCourseRepository.findById("uid-new")).thenReturn(java.util.Optional.of(elasticCourse));
+        when(elasticCourseRepository.findById("uid-missing")).thenReturn(java.util.Optional.empty());
 
         String requestBody = "{" +
                 "\"learningTagIds\": [1, 2]," +
