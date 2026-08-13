@@ -11,10 +11,6 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CourseBulkUpdateResponse {
-
-    @JsonProperty("successful_ids")
     private Collection<String> successfulIds;
-
-    @JsonProperty("failed_ids")
     private Collection<String> failedIds;
 }

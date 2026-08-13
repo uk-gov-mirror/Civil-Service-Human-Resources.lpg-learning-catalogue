@@ -253,11 +253,11 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"ids\": [\"uid-1\", \"uid-2\", \"non-existent\"]}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.successful_ids", hasSize(2)))
-                .andExpect(jsonPath("$.successful_ids[0]").value("uid-1"))
-                .andExpect(jsonPath("$.successful_ids[1]").value("uid-2"))
-                .andExpect(jsonPath("$.failed_ids", hasSize(1)))
-                .andExpect(jsonPath("$.failed_ids[0]").value("non-existent"));
+                .andExpect(jsonPath("$.successfulIds", hasSize(2)))
+                .andExpect(jsonPath("$.successfulIds[0]").value("uid-1"))
+                .andExpect(jsonPath("$.successfulIds[1]").value("uid-2"))
+                .andExpect(jsonPath("$.failedIds", hasSize(1)))
+                .andExpect(jsonPath("$.failedIds[0]").value("non-existent"));
     }
 
     @Test
