@@ -105,13 +105,16 @@ public class LearningTagService {
         return new BulkUpdateDto(successful, failed);
     }
 
-    public CourseBulkUpdateResponse removeCoursesFromLearningTag(Long learningTagId, CourseIdsDto courseIdsDto) {
-        LearningTag learningTag = learningTagRepository.findById(learningTagId)
+    public LearningTag getLearningTagById(Long learningTagId) {
+        return learningTagRepository.findById(learningTagId)
                 .orElseThrow(() -> {
                     log.error("Learning tag with ID {} not found", learningTagId);
                     return new ResourceNotFoundException(String.format("Learning tag with ID %s not found", learningTagId));
                 });
+    }
 
+    public CourseBulkUpdateResponse removeCoursesFromLearningTag(Long learningTagId, CourseIdsDto courseIdsDto) {
+        LearningTag learningTag = getLearningTagById(learningTagId);
         List<String> successful = new ArrayList<>();
         List<String> failed = new ArrayList<>();
 
@@ -139,9 +142,7 @@ public class LearningTagService {
     }
 
     public void assignCoursesToTag(Long learningTagId, CourseLearningTagBulkRequest request) {
-        LearningTag learningTag = learningTagRepository.findById(learningTagId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Learning tag with ID %s not found", learningTagId)));
-
+        LearningTag learningTag = getLearningTagById(learningTagId);
         request.getCourses().forEach(courseRequest -> {
             CourseStatusEntity status = courseStatusRepository.findByName(courseRequest.getStatus())
                     .orElseGet(() -> courseStatusRepository.save(new CourseStatusEntity(courseRequest.getStatus())));
