@@ -112,6 +112,8 @@ public class LearningTagService {
                 CourseLearningTagId id = new CourseLearningTagId(learningTag.getId(), course.getId());
                 if (courseTagRepository.existsById(id)) {
                     courseTagRepository.deleteById(id);
+                } else {
+                    throw new ResourceNotFoundException(String.format("Course with UID %s is not linked with the Learning tag with ID %s", courseUid, learningTagId));
                 }
                 successful.add(courseUid);
             } catch (Exception e) {
