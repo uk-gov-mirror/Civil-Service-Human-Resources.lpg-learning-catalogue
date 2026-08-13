@@ -13,7 +13,6 @@ import uk.gov.cslearning.catalogue.domain.*;
 import uk.gov.cslearning.catalogue.dto.BulkUpdateDto;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
-import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
@@ -31,17 +30,14 @@ public class LearningTagService {
     private final ILearningTagRepository learningTagRepository;
     private final ICourseTagRepository courseTagRepository;
     private final ICourseRepository courseRepository;
-    private final ICourseRepository courseRepository;
     private final ICourseStatusRepository courseStatusRepository;
     private final LearningTagFactory learningTagFactory;
 
-    public LearningTagService(ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository, ICourseRepository courseRepository, LearningTagFactory learningTagDtoFactory) {
     public LearningTagService(ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository,
                               ICourseRepository courseRepository, ICourseStatusRepository courseStatusRepository,
                               LearningTagFactory learningTagDtoFactory) {
         this.learningTagRepository = learningTagRepository;
         this.courseTagRepository = courseTagRepository;
-        this.courseRepository = courseRepository;
         this.courseRepository = courseRepository;
         this.courseStatusRepository = courseStatusRepository;
         this.learningTagFactory = learningTagDtoFactory;
