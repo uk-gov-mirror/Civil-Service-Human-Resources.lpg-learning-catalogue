@@ -1,5 +1,6 @@
 package uk.gov.cslearning.catalogue.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class LearningTagService {
 
@@ -98,24 +100,30 @@ public class LearningTagService {
     }
 
     public CourseBulkUpdateResponse removeCoursesFromLearningTag(Long learningTagId, CourseIdsDto courseIdsDto) {
+        LearningTag learningTag = learningTagRepository.findById(learningTagId)
+                .orElseThrow(() -> {
+                    log.error("Learning tag with ID {} not found", learningTagId);
+                    return new ResourceNotFoundException(String.format("Learning tag with ID %s not found", learningTagId));
+                });
+
         List<String> successful = new ArrayList<>();
         List<String> failed = new ArrayList<>();
-
-        LearningTag learningTag = learningTagRepository.findById(learningTagId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Learning tag with ID %s not found", learningTagId)));
 
         courseIdsDto.getIds().forEach(courseUid -> {
             try {
                 CourseEntity course = courseRepository.findByUid(courseUid)
-                        .orElseThrow(() -> new ResourceNotFoundException(String.format("Course with UID %s not found", courseUid)));
-
+                        .orElseThrow(() -> {
+                            log.error("Course with UID {} not found", courseUid);
+                            return new ResourceNotFoundException(String.format("Course with UID %s not found", courseUid));
+                        });
                 CourseLearningTagId id = new CourseLearningTagId(learningTag.getId(), course.getId());
                 if (courseTagRepository.existsById(id)) {
                     courseTagRepository.deleteById(id);
+                    successful.add(courseUid);
                 } else {
+                    log.error("Course with UID {} is not linked with the Learning tag with ID {}", courseUid, learningTagId);
                     throw new ResourceNotFoundException(String.format("Course with UID %s is not linked with the Learning tag with ID %s", courseUid, learningTagId));
                 }
-                successful.add(courseUid);
             } catch (Exception e) {
                 failed.add(courseUid);
             }
