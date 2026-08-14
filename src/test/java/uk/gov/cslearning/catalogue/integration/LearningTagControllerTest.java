@@ -5,16 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
-import uk.gov.cslearning.catalogue.domain.CourseEntity;
-import uk.gov.cslearning.catalogue.domain.CourseLearningTagEntity;
-import uk.gov.cslearning.catalogue.domain.CourseStatusEntity;
-import uk.gov.cslearning.catalogue.domain.LearningTag;
+import uk.gov.cslearning.catalogue.domain.*;
+import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -33,6 +32,9 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
     @Autowired
     private ICourseTagRepository courseTagRepository;
+
+    @Autowired
+    private CourseRepository elasticCourseRepository;
 
     @Test
     public void testGetLearningTags() throws Exception {
@@ -235,5 +237,71 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.successfulUpdates[0]").value(1))
                 .andExpect(jsonPath("$.successfulUpdates[1]").value(2))
                 .andExpect(jsonPath("$.failedUpdates").isEmpty());
+    }
+
+    @Test
+    @Transactional
+    public void testRemoveCoursesFromLearningTag() throws Exception {
+        CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
+        CourseEntity course1 = courseRepository.save(new CourseEntity("uid-1", "Course 1", draftStatus));
+        CourseEntity course2 = courseRepository.save(new CourseEntity("uid-2", "Course 2", draftStatus));
+
+        LearningTag tag = learningTagRepository.findById(1L).get();
+
+        courseTagRepository.save(new CourseLearningTagEntity(tag, course1));
+        courseTagRepository.save(new CourseLearningTagEntity(tag, course2));
+
+        mvc.perform(delete("/learning-tags/1/courses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"ids\": [\"uid-1\", \"uid-2\", \"non-existent\"]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.successfulIds", hasSize(2)))
+                .andExpect(jsonPath("$.successfulIds[0]").value("uid-1"))
+                .andExpect(jsonPath("$.successfulIds[1]").value("uid-2"))
+                .andExpect(jsonPath("$.failedIds", hasSize(1)))
+                .andExpect(jsonPath("$.failedIds[0]").value("non-existent"));
+    }
+
+    @Test
+    @Transactional
+    public void testAssignCoursesToTag() throws Exception {
+        CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
+
+        courseRepository.save(new CourseEntity("uid-existing", "Old Title", draftStatus));
+
+        Course elasticCourse = new Course();
+        elasticCourse.setId("uid-new");
+        elasticCourse.setTitle("New Course");
+        elasticCourse.setStatus(Status.DRAFT);
+
+        when(elasticCourseRepository.findById("uid-new")).thenReturn(java.util.Optional.of(elasticCourse));
+        when(elasticCourseRepository.findById("uid-missing")).thenReturn(java.util.Optional.empty());
+
+        String requestBody = "{" +
+                "\"learningTagIds\": [1, 2]," +
+                "\"courseIds\": [\"uid-existing\", \"uid-new\", \"uid-missing\"]" +
+                "}";
+
+        mvc.perform(post("/learning-tags/courses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
+                        .with(csrf()))
+                .andExpect(status().isCreated());
+
+        // Verify tags for uid-existing
+        mvc.perform(get("/learning-tags/1/courses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[?(@.id=='uid-existing')]").exists());
+        mvc.perform(get("/learning-tags/2/courses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[?(@.id=='uid-existing')]").exists());
+
+        // Verify tags for uid-new
+        mvc.perform(get("/learning-tags/1/courses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[?(@.id=='uid-new')]").exists());
+        mvc.perform(get("/learning-tags/2/courses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[?(@.id=='uid-new')]").exists());
     }
 }
