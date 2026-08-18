@@ -3,6 +3,8 @@ package uk.gov.cslearning.catalogue.service;
 import org.springframework.stereotype.Service;
 import uk.gov.cslearning.catalogue.domain.LearningTag;
 import uk.gov.cslearning.catalogue.domain.LearningTagDto;
+import uk.gov.cslearning.catalogue.domain.LearningTagHyperlink;
+import uk.gov.cslearning.catalogue.domain.LearningTagHyperlinkDto;
 import uk.gov.cslearning.catalogue.domain.LearningTagState;
 import uk.gov.cslearning.catalogue.service.util.IUtilService;
 
@@ -27,6 +29,15 @@ public class LearningTagFactory {
                 tag.getId(), tag.getName(), tag.getDescription(), tag.getCode(),
                 tag.getUrlSlug(), tag.isCategory(), tag.isArchived(), parentId, parentName,
                 tag.getCreatedTimestamp(), tag.getUpdatedTimestamp(), tag.getArchivedTimestamp()
+        );
+    }
+
+    public LearningTagHyperlinkDto createHyperlinkDto(LearningTagHyperlink hyperlink) {
+        return new LearningTagHyperlinkDto(
+                hyperlink.getId(),
+                hyperlink.getTitle(),
+                hyperlink.getDescription(),
+                hyperlink.getHref()
         );
     }
 

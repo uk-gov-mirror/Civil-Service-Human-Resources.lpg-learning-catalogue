@@ -12,6 +12,7 @@ import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ILearningTagHyperlinkRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
 
 import javax.validation.Valid;
@@ -30,16 +31,29 @@ public class LearningTagService {
     private final ICourseStatusRepository courseStatusRepository;
     private final LearningTagFactory learningTagFactory;
     private final CourseRepository elasticCourseRepository;
+    private final ILearningTagHyperlinkRepository learningTagHyperlinkRepository;
 
     public LearningTagService(ILearningTagRepository learningTagRepository, ICourseTagRepository courseTagRepository,
                               ICourseRepository courseRepository, ICourseStatusRepository courseStatusRepository,
-                              LearningTagFactory learningTagDtoFactory, CourseRepository elasticCourseRepository) {
+                              LearningTagFactory learningTagDtoFactory, CourseRepository elasticCourseRepository,
+                              ILearningTagHyperlinkRepository learningTagHyperlinkRepository) {
         this.learningTagRepository = learningTagRepository;
         this.courseTagRepository = courseTagRepository;
         this.courseRepository = courseRepository;
         this.courseStatusRepository = courseStatusRepository;
         this.learningTagFactory = learningTagDtoFactory;
         this.elasticCourseRepository = elasticCourseRepository;
+        this.learningTagHyperlinkRepository = learningTagHyperlinkRepository;
+    }
+
+    public SimplePage<LearningTagHyperlinkDto> getHyperlinksByLearningTagId(Long learningTagId, Pageable pageable) {
+        Page<LearningTagHyperlink> page = learningTagHyperlinkRepository.findByLearningTagIdOrderByTitleAsc(learningTagId, pageable);
+        return new SimplePage<>(
+                page.getContent().stream()
+                        .map(learningTagFactory::createHyperlinkDto)
+                        .collect(Collectors.toList()),
+                page.getTotalElements(),
+                pageable);
     }
 
     public SimplePage<LearningTagDto> getLearningTags(Pageable pageable) {
