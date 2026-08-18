@@ -2,8 +2,8 @@ CREATE TABLE learning_tag_hyperlink
 (
     id                              BIGINT AUTO_INCREMENT,
     learning_tag_id                 BIGINT                  NOT NULL,
-    href                            VARCHAR(255)           NOT NULL,
-    title                           VARCHAR(50)            NOT NULL,
+    href                            VARCHAR(255)            NOT NULL,
+    title                           VARCHAR(50)             NOT NULL,
     description                     VARCHAR(255),
     created_timestamp               TIMESTAMP DEFAULT NOW() NOT NULL,
     updated_timestamp               TIMESTAMP DEFAULT NOW() NOT NULL,

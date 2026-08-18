@@ -314,8 +314,8 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     public void testGetHyperlinksByLearningTag() throws Exception {
         LearningTag tag1 = learningTagRepository.findById(1L).get();
 
-        learningTagHyperlinkRepository.save(new LearningTagHyperlink(tag1, "https://www.bbc.co.uk/news", "BBC news", "BBC news website"));
         learningTagHyperlinkRepository.save(new LearningTagHyperlink(tag1, "https://news.sky.com/uk", "Sky news", "Sky news website"));
+        learningTagHyperlinkRepository.save(new LearningTagHyperlink(tag1, "https://www.bbc.co.uk/news", "BBC news", "BBC news website"));
         learningTagHyperlinkRepository.save(new LearningTagHyperlink(tag1, "https://stackoverflow.com/questions", "Stack overflow questions", "Stack overflow questions website"));
 
         mvc.perform(get("/learning-tags/1/hyperlinks?page=0&size=2"))
