@@ -1,8 +1,9 @@
 CREATE TABLE course
 (
     id                 BIGINT AUTO_INCREMENT,
-    uid                varchar(255)            NOT NULL,
-    title              varchar(255)            NOT NULL,
+    uid                VARCHAR(255)            NOT NULL,
+    title              VARCHAR(255)            NOT NULL,
+    short_description  VARCHAR(160)            NOT NULL,
     status_id          BIGINT                  NOT NULL,
 
     CONSTRAINT pk_course PRIMARY KEY (id),
