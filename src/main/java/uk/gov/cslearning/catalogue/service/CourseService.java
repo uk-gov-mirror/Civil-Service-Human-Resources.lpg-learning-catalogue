@@ -101,11 +101,15 @@ public class CourseService {
 
         boolean updateSql = false;
 
-        if (!course.getTitle().equals(newCourse.getTitle())) {
+        if (!Objects.equals(course.getTitle(), newCourse.getTitle())) {
             updateSql = true;
         }
 
-        if (!course.getStatus().equals(newCourse.getStatus())) {
+        if (!Objects.equals(course.getStatus(), newCourse.getStatus())) {
+            updateSql = true;
+        }
+
+        if (!Objects.equals(course.getShortDescription(), newCourse.getShortDescription())) {
             updateSql = true;
         }
 
@@ -132,6 +136,7 @@ public class CourseService {
         if (updateSql) {
             iCourseRepository.findByUid(course.getId()).ifPresent(courseEntity -> {
                 courseEntity.setTitle(course.getTitle());
+                courseEntity.setShortDescription(course.getShortDescription());
                 iCourseStatusRepository.findByName(course.getStatus().name()).ifPresent(courseEntity::setStatus);
                 iCourseRepository.save(courseEntity);
             });

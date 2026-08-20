@@ -1,0 +1,1 @@
+ALTER TABLE course ADD COLUMN short_description VARCHAR(160) NOT NULL;

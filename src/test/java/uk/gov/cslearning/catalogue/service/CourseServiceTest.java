@@ -242,6 +242,7 @@ public class CourseServiceTest {
         verify(courseRepository).save(any());
         verify(iCourseRepository).findByUid(courseId);
         verify(courseEntity).setTitle(newTitle);
+        verify(courseEntity).setShortDescription(newShortDescription);
         verify(courseEntity).setStatus(any());
         verify(iCourseRepository).save(courseEntity);
 
@@ -253,6 +254,40 @@ public class CourseServiceTest {
         assertEquals(owner2, savedCourse.getOwner());
         assertEquals(visibility, savedCourse.getVisibility());
         assertEquals(archived, savedCourse.getStatus());
+    }
+
+    @Test
+    public void shouldUpdateCourseSqlWhenOnlyShortDescriptionChanges() {
+        String courseId = "course-id-sd-test";
+        Course course = new Course();
+        course.setId(courseId);
+        course.setTitle("same-title");
+        course.setShortDescription("old-short-description");
+        course.setDescription("desc");
+        course.setStatus(Status.DRAFT);
+        course.setVisibility(Visibility.PUBLIC);
+
+        Course newCourse = new Course();
+        newCourse.setTitle("same-title");
+        newCourse.setShortDescription("new-short-description");
+        newCourse.setDescription("desc");
+        newCourse.setStatus(Status.DRAFT);
+        newCourse.setVisibility(Visibility.PUBLIC);
+
+        uk.gov.cslearning.catalogue.domain.CourseEntity courseEntity = mock(uk.gov.cslearning.catalogue.domain.CourseEntity.class);
+        when(iCourseRepository.findByUid(courseId)).thenReturn(Optional.of(courseEntity));
+        when(iCourseStatusRepository.findByName(Status.DRAFT.name())).thenReturn(Optional.of(new uk.gov.cslearning.catalogue.domain.CourseStatusEntity(Status.DRAFT.name())));
+
+        Course savedCourse = courseService.updateCourse(course, newCourse);
+
+        verify(courseRepository).save(any());
+        verify(iCourseRepository).findByUid(courseId);
+        verify(courseEntity).setTitle("same-title");
+        verify(courseEntity).setShortDescription("new-short-description");
+        verify(courseEntity).setStatus(any());
+        verify(iCourseRepository).save(courseEntity);
+
+        assertEquals("new-short-description", savedCourse.getShortDescription());
     }
 
     @Test

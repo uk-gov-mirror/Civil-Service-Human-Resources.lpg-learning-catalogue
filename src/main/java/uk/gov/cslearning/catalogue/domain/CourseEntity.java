@@ -23,18 +23,23 @@ public class CourseEntity {
     @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false, length = 160)
+    private String shortDescription;
+
     @ManyToOne
     @JoinColumn(name = "status_id", nullable = false)
     private CourseStatusEntity status;
 
-    public CourseEntity(String uid, String title) {
+    public CourseEntity(String uid, String title, String shortDescription) {
         this.uid = uid;
         this.title = title;
+        this.shortDescription = shortDescription;
     }
 
-    public CourseEntity(String uid, String title, CourseStatusEntity status) {
+    public CourseEntity(String uid, String title, String shortDescription, CourseStatusEntity status) {
         this.uid = uid;
         this.title = title;
+        this.shortDescription = shortDescription;
         this.status = status;
     }
 }

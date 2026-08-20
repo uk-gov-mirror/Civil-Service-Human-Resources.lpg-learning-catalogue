@@ -69,6 +69,7 @@ public class LearningTagService {
                         .map(entity -> new CourseLearningTagResponse(
                                 entity.getCourse().getUid(),
                                 entity.getCourse().getTitle(),
+                                entity.getCourse().getShortDescription(),
                                 entity.getCourse().getStatus().getName()))
                         .collect(Collectors.toList()),
                 page.getTotalElements(),
@@ -172,7 +173,7 @@ public class LearningTagService {
                         CourseStatusEntity status = courseStatusRepository.findByName(elasticCourse.getStatus().getValue())
                                 .orElseGet(() -> courseStatusRepository.save(new CourseStatusEntity(elasticCourse.getStatus().getValue())));
 
-                        return courseRepository.save(new CourseEntity(elasticCourse.getId(), elasticCourse.getTitle(), status));
+                        return courseRepository.save(new CourseEntity(elasticCourse.getId(), elasticCourse.getTitle(), elasticCourse.getShortDescription(), status));
                     });
 
             if (course != null) {
