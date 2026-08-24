@@ -194,9 +194,9 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     @Transactional
     public void testGetCoursesByLearningTag() throws Exception {
         CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
-        CourseEntity course1 = courseRepository.save(new CourseEntity("uid-b", "Course B", draftStatus));
-        CourseEntity course2 = courseRepository.save(new CourseEntity("uid-a", "Course A", draftStatus));
-        CourseEntity course3 = courseRepository.save(new CourseEntity("uid-c", "Course C", draftStatus));
+        CourseEntity course1 = courseRepository.save(new CourseEntity("uid-b", "Course B", "Course B short description", draftStatus));
+        CourseEntity course2 = courseRepository.save(new CourseEntity("uid-a", "Course A", "Course A short description", draftStatus));
+        CourseEntity course3 = courseRepository.save(new CourseEntity("uid-c", "Course C", "Course C short description", draftStatus));
 
         LearningTag tag = learningTagRepository.findById(1L).get();
 
@@ -209,9 +209,11 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].title").value("Course A"))
                 .andExpect(jsonPath("$.content[0].id").value("uid-a"))
+                .andExpect(jsonPath("$.content[0].shortDescription").value("Course A short description"))
                 .andExpect(jsonPath("$.content[0].status").value("Draft"))
                 .andExpect(jsonPath("$.content[1].title").value("Course B"))
                 .andExpect(jsonPath("$.content[1].id").value("uid-b"))
+                .andExpect(jsonPath("$.content[1].shortDescription").value("Course B short description"))
                 .andExpect(jsonPath("$.content[1].status").value("Draft"))
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.size").value(2))
@@ -243,8 +245,8 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     @Transactional
     public void testRemoveCoursesFromLearningTag() throws Exception {
         CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
-        CourseEntity course1 = courseRepository.save(new CourseEntity("uid-1", "Course 1", draftStatus));
-        CourseEntity course2 = courseRepository.save(new CourseEntity("uid-2", "Course 2", draftStatus));
+        CourseEntity course1 = courseRepository.save(new CourseEntity("uid-1", "Course 1", "Course 1 short description", draftStatus));
+        CourseEntity course2 = courseRepository.save(new CourseEntity("uid-2", "Course 2", "Course 2 short description", draftStatus));
 
         LearningTag tag = learningTagRepository.findById(1L).get();
 
@@ -267,11 +269,12 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     public void testAssignCoursesToTag() throws Exception {
         CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
 
-        courseRepository.save(new CourseEntity("uid-existing", "Old Title", draftStatus));
+        courseRepository.save(new CourseEntity("uid-existing", "Old Title", "Old short description", draftStatus));
 
         Course elasticCourse = new Course();
         elasticCourse.setId("uid-new");
         elasticCourse.setTitle("New Course");
+        elasticCourse.setShortDescription("New Course short description");
         elasticCourse.setStatus(Status.DRAFT);
 
         when(elasticCourseRepository.findById("uid-new")).thenReturn(java.util.Optional.of(elasticCourse));
