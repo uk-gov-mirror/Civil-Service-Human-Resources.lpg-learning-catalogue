@@ -10,6 +10,7 @@ import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
+import uk.gov.cslearning.catalogue.repository.sql.ILearningTagHyperlinkRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -29,6 +30,9 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
     @Autowired
     private ILearningTagRepository learningTagRepository;
+
+    @Autowired
+    private ILearningTagHyperlinkRepository learningTagHyperlinkRepository;
 
     @Autowired
     private ICourseTagRepository courseTagRepository;
@@ -306,5 +310,56 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
         mvc.perform(get("/learning-tags/2/courses"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[?(@.id=='uid-new')]").exists());
+    }
+
+    @Test
+    @Transactional
+    public void testGetHyperlinksByLearningTag() throws Exception {
+        LearningTag tag1 = learningTagRepository.findById(1L).get();
+
+        learningTagHyperlinkRepository.save(new LearningTagHyperlink(tag1, "https://news.sky.com/uk", "Sky news", "Sky news website"));
+        learningTagHyperlinkRepository.save(new LearningTagHyperlink(tag1, "https://www.bbc.co.uk/news", "BBC news", "BBC news website"));
+        learningTagHyperlinkRepository.save(new LearningTagHyperlink(tag1, "https://stackoverflow.com/questions", "Stack overflow questions", "Stack overflow questions website"));
+
+        mvc.perform(get("/learning-tags/1/hyperlinks?page=0&size=2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].title").value("BBC news"))
+                .andExpect(jsonPath("$.content[0].href").value("https://www.bbc.co.uk/news"))
+                .andExpect(jsonPath("$.content[0].description").value("BBC news website"))
+                .andExpect(jsonPath("$.content[0].id").isNumber())
+                .andExpect(jsonPath("$.content[1].title").value("Sky news"))
+                .andExpect(jsonPath("$.content[1].href").value("https://news.sky.com/uk"))
+                .andExpect(jsonPath("$.content[1].description").value("Sky news website"))
+                .andExpect(jsonPath("$.content[1].id").isNumber())
+                .andExpect(jsonPath("$.size").value(2))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.numberOfElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.totalResults").value(3))
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.first").value(true))
+                .andExpect(jsonPath("$.last").value(false))
+                .andExpect(jsonPath("$.empty").value(false))
+                .andExpect(jsonPath("$.pageable").exists());
+
+        mvc.perform(get("/learning-tags/1/hyperlinks?page=1&size=2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].title").value("Stack overflow questions"))
+                .andExpect(jsonPath("$.content[0].href").value("https://stackoverflow.com/questions"))
+                .andExpect(jsonPath("$.content[0].description").value("Stack overflow questions website"))
+                .andExpect(jsonPath("$.size").value(2))
+                .andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.number").value(1))
+                .andExpect(jsonPath("$.numberOfElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.totalResults").value(3))
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.first").value(false))
+                .andExpect(jsonPath("$.last").value(true))
+                .andExpect(jsonPath("$.empty").value(false))
+                .andExpect(jsonPath("$.pageable").exists());
     }
 }

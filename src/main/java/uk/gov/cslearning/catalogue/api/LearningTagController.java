@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import uk.gov.cslearning.catalogue.api.models.*;
 import uk.gov.cslearning.catalogue.domain.LearningTagBulkStateDto;
 import uk.gov.cslearning.catalogue.domain.LearningTagDto;
+import uk.gov.cslearning.catalogue.domain.LearningTagHyperlinkDto;
 import uk.gov.cslearning.catalogue.dto.BulkUpdateDto;
 import uk.gov.cslearning.catalogue.service.LearningTagService;
 
@@ -34,6 +35,13 @@ public class LearningTagController {
     @ResponseStatus(HttpStatus.OK)
     public SimplePage<CourseLearningTagResponse> getCoursesByTag(@PathVariable Long learningTagId, PageableParams pageable) {
         return learningTagService.getCoursesByLearningTagId(learningTagId, pageable.getAsPageable());
+    }
+
+    @GetMapping("/{learningTagId}/hyperlinks")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    public SimplePage<LearningTagHyperlinkDto> getHyperlinksByTag(@PathVariable Long learningTagId, PageableParams pageable) {
+        return learningTagService.getHyperlinksByLearningTagId(learningTagId, pageable.getAsPageable());
     }
 
     @PostMapping
