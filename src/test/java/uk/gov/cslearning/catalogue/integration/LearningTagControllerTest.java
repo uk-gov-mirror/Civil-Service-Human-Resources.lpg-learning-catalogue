@@ -4,14 +4,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
-
 import uk.gov.cslearning.catalogue.domain.*;
 import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
-import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
-import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
-import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
-import uk.gov.cslearning.catalogue.repository.sql.ILearningTagHyperlinkRepository;
-import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
+import uk.gov.cslearning.catalogue.repository.sql.*;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
@@ -54,6 +49,8 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.content[0].parentName").isEmpty())
                 .andExpect(jsonPath("$.content[0].archived").value(false))
                 .andExpect(jsonPath("$.content[0].category").value(true))
+                .andExpect(jsonPath("$.content[0].courseCount").value(3))
+                .andExpect(jsonPath("$.content[0].linkCount").value(2))
                 .andExpect(jsonPath("$.content[1].name").value("Tech"))
                 .andExpect(jsonPath("$.content[1].description").value("Technical skills"))
                 .andExpect(jsonPath("$.content[1].code").value("TECH"))
@@ -310,6 +307,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
         mvc.perform(get("/learning-tags/2/courses"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[?(@.id=='uid-new')]").exists());
+
     }
 
     @Test

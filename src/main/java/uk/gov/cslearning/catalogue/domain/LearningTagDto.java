@@ -37,5 +37,7 @@ public class LearningTagDto {
     private LocalDateTime createdTimestamp;
     private LocalDateTime updatedTimestamp;
     private LocalDateTime archivedTimestamp;
+    private Integer courseCount;
+    private Integer linkCount;
 
 }
