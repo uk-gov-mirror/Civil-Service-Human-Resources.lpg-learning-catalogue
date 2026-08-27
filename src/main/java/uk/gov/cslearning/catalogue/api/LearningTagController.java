@@ -72,6 +72,13 @@ public class LearningTagController {
         return learningTagService.removeCoursesFromLearningTag(learningTagId, courseIdsDto);
     }
 
+    @DeleteMapping("/{learningTagId}/hyperlinks")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    public HyperlinkBulkUpdateResponse removeHyperlinksFromTag(@PathVariable Long learningTagId, @RequestBody HyperlinkIdsDto hyperlinkIdsDto) {
+        return learningTagService.removeHyperlinksFromLearningTag(learningTagId, hyperlinkIdsDto);
+    }
+
     @PostMapping("/courses")
     @ResponseStatus(HttpStatus.CREATED)
     public void assignCoursesToTag(@Valid @RequestBody LearningTagCourseBulkRequest request) {

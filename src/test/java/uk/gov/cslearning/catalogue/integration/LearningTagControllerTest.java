@@ -362,4 +362,23 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.empty").value(false))
                 .andExpect(jsonPath("$.pageable").exists());
     }
+
+    @Test
+    @Transactional
+    public void testRemoveHyperlinksFromLearningTag() throws Exception {
+        LearningTag tag1 = learningTagRepository.findById(1L).get();
+
+        LearningTagHyperlink h1 = learningTagHyperlinkRepository.save(new LearningTagHyperlink(tag1, "https://news.sky.com/uk", "Sky news", "Sky news website"));
+        LearningTagHyperlink h2 = learningTagHyperlinkRepository.save(new LearningTagHyperlink(tag1, "https://www.bbc.co.uk/news", "BBC news", "BBC news website"));
+
+        mvc.perform(delete("/learning-tags/1/hyperlinks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(String.format("{\"ids\": [%d, %d, 99999]}", h1.getId(), h2.getId())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.successfulIds", hasSize(2)))
+                .andExpect(jsonPath("$.successfulIds[0]").value(h1.getId()))
+                .andExpect(jsonPath("$.successfulIds[1]").value(h2.getId()))
+                .andExpect(jsonPath("$.failedIds", hasSize(1)))
+                .andExpect(jsonPath("$.failedIds[0]").value(99999));
+    }
 }

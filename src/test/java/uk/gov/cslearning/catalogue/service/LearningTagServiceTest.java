@@ -9,10 +9,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import uk.gov.cslearning.catalogue.api.models.HyperlinkBulkUpdateResponse;
+import uk.gov.cslearning.catalogue.api.models.HyperlinkIdsDto;
 import uk.gov.cslearning.catalogue.api.models.SimplePage;
 import uk.gov.cslearning.catalogue.domain.LearningTag;
 import uk.gov.cslearning.catalogue.domain.LearningTagHyperlink;
 import uk.gov.cslearning.catalogue.domain.LearningTagHyperlinkDto;
+import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
 import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
@@ -20,12 +23,14 @@ import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagHyperlinkRepository;
 import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LearningTagServiceTest {
@@ -94,5 +99,42 @@ public class LearningTagServiceTest {
 
         verify(learningTagHyperlinkRepository).findByLearningTagIdOrderByTitleAsc(tagId, pageable);
         verify(learningTagFactory).createHyperlinkDto(hyperlink);
+    }
+
+    @Test
+    public void testRemoveHyperlinksFromLearningTag() {
+        Long tagId = 1L;
+        LearningTag tag = new LearningTag();
+        tag.setId(tagId);
+
+        when(learningTagRepository.findById(tagId)).thenReturn(Optional.of(tag));
+
+        LearningTagHyperlink hyperlink1 = new LearningTagHyperlink(101L, tag, "https://bbc.co.uk", "BBC", "BBC Desc", null, null);
+        LearningTagHyperlink hyperlink2 = new LearningTagHyperlink(102L, tag, "https://sky.com", "Sky", "Sky Desc", null, null);
+
+        when(learningTagHyperlinkRepository.findByIdAndLearningTagId(101L, tagId)).thenReturn(Optional.of(hyperlink1));
+        when(learningTagHyperlinkRepository.findByIdAndLearningTagId(102L, tagId)).thenReturn(Optional.of(hyperlink2));
+        when(learningTagHyperlinkRepository.findByIdAndLearningTagId(103L, tagId)).thenReturn(Optional.empty());
+
+        HyperlinkIdsDto dto = new HyperlinkIdsDto(Arrays.asList(101L, 102L, 103L));
+        HyperlinkBulkUpdateResponse response = learningTagService.removeHyperlinksFromLearningTag(tagId, dto);
+
+        assertEquals(2, response.getSuccessfulIds().size());
+        assertTrue(response.getSuccessfulIds().contains(101L));
+        assertTrue(response.getSuccessfulIds().contains(102L));
+        assertEquals(1, response.getFailedIds().size());
+        assertTrue(response.getFailedIds().contains(103L));
+
+        verify(learningTagHyperlinkRepository).delete(hyperlink1);
+        verify(learningTagHyperlinkRepository).delete(hyperlink2);
+    }
+
+    @Test(expected = ResourceNotFoundException.class)
+    public void testRemoveHyperlinksFromLearningTagWhenTagNotFound() {
+        Long tagId = 999L;
+        when(learningTagRepository.findById(tagId)).thenReturn(Optional.empty());
+
+        HyperlinkIdsDto dto = new HyperlinkIdsDto(Arrays.asList(101L));
+        learningTagService.removeHyperlinksFromLearningTag(tagId, dto);
     }
 }
