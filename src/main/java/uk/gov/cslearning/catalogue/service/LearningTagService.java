@@ -127,7 +127,7 @@ public class LearningTagService {
                 });
     }
 
-    public CourseBulkUpdateResponse removeCoursesFromLearningTag(Long learningTagId, CourseIdsDto courseIdsDto) {
+    public BulkUpdateResponse<String> removeCoursesFromLearningTag(Long learningTagId, IdsDto<String> courseIdsDto) {
         LearningTag learningTag = getLearningTagById(learningTagId);
         List<String> successful = new ArrayList<>();
         List<String> failed = new ArrayList<>();
@@ -152,10 +152,10 @@ public class LearningTagService {
             }
         });
 
-        return new CourseBulkUpdateResponse(successful, failed);
+        return new BulkUpdateResponse<>(successful, failed);
     }
 
-    public HyperlinkBulkUpdateResponse removeHyperlinksFromLearningTag(Long learningTagId, HyperlinkIdsDto hyperlinkIdsDto) {
+    public BulkUpdateResponse<Long> removeHyperlinksFromLearningTag(Long learningTagId, IdsDto<Long> hyperlinkIdsDto) {
         LearningTag learningTag = getLearningTagById(learningTagId);
         List<Long> successful = new ArrayList<>();
         List<Long> failed = new ArrayList<>();
@@ -176,7 +176,7 @@ public class LearningTagService {
             });
         }
 
-        return new HyperlinkBulkUpdateResponse(successful, failed);
+        return new BulkUpdateResponse<>(successful, failed);
     }
 
     public void assignCoursesToTag(LearningTagCourseBulkRequest request) {

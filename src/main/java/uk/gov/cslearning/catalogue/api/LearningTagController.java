@@ -68,14 +68,14 @@ public class LearningTagController {
     @DeleteMapping("/{learningTagId}/courses")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public CourseBulkUpdateResponse removeCoursesFromTag(@PathVariable Long learningTagId, @RequestBody CourseIdsDto courseIdsDto) {
+    public BulkUpdateResponse<String> removeCoursesFromTag(@PathVariable Long learningTagId, @RequestBody IdsDto<String> courseIdsDto) {
         return learningTagService.removeCoursesFromLearningTag(learningTagId, courseIdsDto);
     }
 
     @DeleteMapping("/{learningTagId}/hyperlinks")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public HyperlinkBulkUpdateResponse removeHyperlinksFromTag(@PathVariable Long learningTagId, @RequestBody HyperlinkIdsDto hyperlinkIdsDto) {
+    public BulkUpdateResponse<Long> removeHyperlinksFromTag(@PathVariable Long learningTagId, @RequestBody IdsDto<Long> hyperlinkIdsDto) {
         return learningTagService.removeHyperlinksFromLearningTag(learningTagId, hyperlinkIdsDto);
     }
 

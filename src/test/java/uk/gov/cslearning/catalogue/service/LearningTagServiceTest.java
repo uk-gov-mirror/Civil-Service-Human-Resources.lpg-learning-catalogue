@@ -9,9 +9,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import uk.gov.cslearning.catalogue.api.models.HyperlinkBulkUpdateResponse;
-import uk.gov.cslearning.catalogue.api.models.HyperlinkIdsDto;
+import uk.gov.cslearning.catalogue.api.models.BulkUpdateResponse;
+import uk.gov.cslearning.catalogue.api.models.IdsDto;
 import uk.gov.cslearning.catalogue.api.models.SimplePage;
+import uk.gov.cslearning.catalogue.domain.CourseEntity;
+import uk.gov.cslearning.catalogue.domain.CourseLearningTagId;
 import uk.gov.cslearning.catalogue.domain.LearningTag;
 import uk.gov.cslearning.catalogue.domain.LearningTagHyperlink;
 import uk.gov.cslearning.catalogue.domain.LearningTagHyperlinkDto;
@@ -116,8 +118,8 @@ public class LearningTagServiceTest {
         when(learningTagHyperlinkRepository.findByIdAndLearningTagId(102L, tagId)).thenReturn(Optional.of(hyperlink2));
         when(learningTagHyperlinkRepository.findByIdAndLearningTagId(103L, tagId)).thenReturn(Optional.empty());
 
-        HyperlinkIdsDto dto = new HyperlinkIdsDto(Arrays.asList(101L, 102L, 103L));
-        HyperlinkBulkUpdateResponse response = learningTagService.removeHyperlinksFromLearningTag(tagId, dto);
+        IdsDto<Long> dto = new IdsDto<>(Arrays.asList(101L, 102L, 103L));
+        BulkUpdateResponse<Long> response = learningTagService.removeHyperlinksFromLearningTag(tagId, dto);
 
         assertEquals(2, response.getSuccessfulIds().size());
         assertTrue(response.getSuccessfulIds().contains(101L));
@@ -134,7 +136,51 @@ public class LearningTagServiceTest {
         Long tagId = 999L;
         when(learningTagRepository.findById(tagId)).thenReturn(Optional.empty());
 
-        HyperlinkIdsDto dto = new HyperlinkIdsDto(Arrays.asList(101L));
+        IdsDto<Long> dto = new IdsDto<>(Arrays.asList(101L));
         learningTagService.removeHyperlinksFromLearningTag(tagId, dto);
+    }
+
+    @Test
+    public void testRemoveCoursesFromLearningTag() {
+        Long tagId = 1L;
+        LearningTag tag = new LearningTag();
+        tag.setId(tagId);
+
+        when(learningTagRepository.findById(tagId)).thenReturn(Optional.of(tag));
+
+        CourseEntity course1 = new CourseEntity();
+        course1.setId(10L);
+        course1.setUid("course-1");
+
+        CourseEntity course2 = new CourseEntity();
+        course2.setId(20L);
+        course2.setUid("course-2");
+
+        when(courseRepository.findByUid("course-1")).thenReturn(Optional.of(course1));
+        when(courseRepository.findByUid("course-2")).thenReturn(Optional.of(course2));
+        when(courseRepository.findByUid("course-3")).thenReturn(Optional.empty());
+
+        when(courseTagRepository.existsById(new CourseLearningTagId(tagId, 10L))).thenReturn(true);
+        when(courseTagRepository.existsById(new CourseLearningTagId(tagId, 20L))).thenReturn(false);
+
+        IdsDto<String> dto = new IdsDto<>(Arrays.asList("course-1", "course-2", "course-3"));
+        BulkUpdateResponse<String> response = learningTagService.removeCoursesFromLearningTag(tagId, dto);
+
+        assertEquals(1, response.getSuccessfulIds().size());
+        assertTrue(response.getSuccessfulIds().contains("course-1"));
+        assertEquals(2, response.getFailedIds().size());
+        assertTrue(response.getFailedIds().contains("course-2"));
+        assertTrue(response.getFailedIds().contains("course-3"));
+
+        verify(courseTagRepository).deleteById(new CourseLearningTagId(tagId, 10L));
+    }
+
+    @Test(expected = ResourceNotFoundException.class)
+    public void testRemoveCoursesFromLearningTagWhenTagNotFound() {
+        Long tagId = 999L;
+        when(learningTagRepository.findById(tagId)).thenReturn(Optional.empty());
+
+        IdsDto<String> dto = new IdsDto<>(Arrays.asList("course-1"));
+        learningTagService.removeCoursesFromLearningTag(tagId, dto);
     }
 }

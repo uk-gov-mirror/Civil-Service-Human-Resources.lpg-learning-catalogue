@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Collection;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HyperlinkIdsDto {
-    private List<Long> ids;
+public class BulkUpdateResponse<T> {
+    private Collection<T> successfulIds;
+    private Collection<T> failedIds;
 }
