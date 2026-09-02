@@ -195,15 +195,11 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     @Transactional
     public void testGetCoursesByLearningTag() throws Exception {
         CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
-        CourseEntity course1 = courseRepository.save(new CourseEntity("uid-b", "Course B", "Course B short description", draftStatus));
         CourseEntity course2 = courseRepository.save(new CourseEntity("uid-a", "Course A", "Course A short description", draftStatus));
-        CourseEntity course3 = courseRepository.save(new CourseEntity("uid-c", "Course C", "Course C short description", draftStatus));
 
         LearningTag tag = learningTagRepository.findById(1L).get();
 
-        courseTagRepository.save(new CourseLearningTagEntity(tag, course1));
         courseTagRepository.save(new CourseLearningTagEntity(tag, course2));
-        courseTagRepository.save(new CourseLearningTagEntity(tag, course3));
 
         mvc.perform(get("/learning-tags/1/courses?page=0&size=2"))
                 .andExpect(status().isOk())
@@ -212,15 +208,15 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.content[0].id").value("uid-a"))
                 .andExpect(jsonPath("$.content[0].shortDescription").value("Course A short description"))
                 .andExpect(jsonPath("$.content[0].status").value("Draft"))
-                .andExpect(jsonPath("$.content[1].title").value("Course B"))
-                .andExpect(jsonPath("$.content[1].id").value("uid-b"))
-                .andExpect(jsonPath("$.content[1].shortDescription").value("Course B short description"))
-                .andExpect(jsonPath("$.content[1].status").value("Draft"))
+                .andExpect(jsonPath("$.content[1].title").value("Course ABC"))
+                .andExpect(jsonPath("$.content[1].id").value("ABC"))
+                .andExpect(jsonPath("$.content[1].shortDescription").value("Course ABC short description"))
+                .andExpect(jsonPath("$.content[1].status").value("Published"))
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.size").value(2))
-                .andExpect(jsonPath("$.totalResults").value(3))
+                .andExpect(jsonPath("$.totalResults").value(4))
                 .andExpect(jsonPath("$.totalPages").value(2))
-                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.totalElements").value(4))
                 .andExpect(jsonPath("$.numberOfElements").value(2))
                 .andExpect(jsonPath("$.first").value(true))
                 .andExpect(jsonPath("$.last").value(false))
@@ -315,20 +311,18 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     public void testGetHyperlinksByLearningTag() throws Exception {
         LearningTag tag1 = learningTagRepository.findById(1L).get();
 
-        learningTagHyperlinkRepository.save(new LearningTagHyperlink(tag1, "https://news.sky.com/uk", "Sky news", "Sky news website"));
         learningTagHyperlinkRepository.save(new LearningTagHyperlink(tag1, "https://www.bbc.co.uk/news", "BBC news", "BBC news website"));
-        learningTagHyperlinkRepository.save(new LearningTagHyperlink(tag1, "https://stackoverflow.com/questions", "Stack overflow questions", "Stack overflow questions website"));
 
         mvc.perform(get("/learning-tags/1/hyperlinks?page=0&size=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[0].title").value("BBC news"))
-                .andExpect(jsonPath("$.content[0].href").value("https://www.bbc.co.uk/news"))
-                .andExpect(jsonPath("$.content[0].description").value("BBC news website"))
+                .andExpect(jsonPath("$.content[0].title").value("Another fake site"))
+                .andExpect(jsonPath("$.content[0].href").value("https://www.another-fake-site.co.uk"))
+                .andExpect(jsonPath("$.content[0].description").value("Another fake website"))
                 .andExpect(jsonPath("$.content[0].id").isNumber())
-                .andExpect(jsonPath("$.content[1].title").value("Sky news"))
-                .andExpect(jsonPath("$.content[1].href").value("https://news.sky.com/uk"))
-                .andExpect(jsonPath("$.content[1].description").value("Sky news website"))
+                .andExpect(jsonPath("$.content[1].title").value("BBC news"))
+                .andExpect(jsonPath("$.content[1].href").value("https://www.bbc.co.uk/news"))
+                .andExpect(jsonPath("$.content[1].description").value("BBC news website"))
                 .andExpect(jsonPath("$.content[1].id").isNumber())
                 .andExpect(jsonPath("$.size").value(2))
                 .andExpect(jsonPath("$.page").value(0))
@@ -345,9 +339,9 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
         mvc.perform(get("/learning-tags/1/hyperlinks?page=1&size=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].title").value("Stack overflow questions"))
-                .andExpect(jsonPath("$.content[0].href").value("https://stackoverflow.com/questions"))
-                .andExpect(jsonPath("$.content[0].description").value("Stack overflow questions website"))
+                .andExpect(jsonPath("$.content[0].title").value("Fake site"))
+                .andExpect(jsonPath("$.content[0].href").value("https://www.fake-site.co.uk"))
+                .andExpect(jsonPath("$.content[0].description").value("A fake website"))
                 .andExpect(jsonPath("$.size").value(2))
                 .andExpect(jsonPath("$.page").value(1))
                 .andExpect(jsonPath("$.number").value(1))
