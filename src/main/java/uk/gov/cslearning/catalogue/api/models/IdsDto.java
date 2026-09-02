@@ -9,6 +9,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CourseIdsDto {
-    private List<String> ids;
+public class IdsDto<T> {
+    private List<T> ids;
 }

@@ -127,7 +127,7 @@ public class LearningTagService {
                 });
     }
 
-    public CourseBulkUpdateResponse removeCoursesFromLearningTag(Long learningTagId, CourseIdsDto courseIdsDto) {
+    public BulkUpdateResponse<String> removeCoursesFromLearningTag(Long learningTagId, IdsDto<String> courseIdsDto) {
         LearningTag learningTag = getLearningTagById(learningTagId);
         List<String> successful = new ArrayList<>();
         List<String> failed = new ArrayList<>();
@@ -152,7 +152,31 @@ public class LearningTagService {
             }
         });
 
-        return new CourseBulkUpdateResponse(successful, failed);
+        return new BulkUpdateResponse<>(successful, failed);
+    }
+
+    public BulkUpdateResponse<Long> removeHyperlinksFromLearningTag(Long learningTagId, IdsDto<Long> hyperlinkIdsDto) {
+        LearningTag learningTag = getLearningTagById(learningTagId);
+        List<Long> successful = new ArrayList<>();
+        List<Long> failed = new ArrayList<>();
+
+        if (hyperlinkIdsDto != null && hyperlinkIdsDto.getIds() != null) {
+            hyperlinkIdsDto.getIds().forEach(hyperlinkId -> {
+                try {
+                    LearningTagHyperlink hyperlink = learningTagHyperlinkRepository.findByIdAndLearningTagId(hyperlinkId, learningTag.getId())
+                            .orElseThrow(() -> {
+                                log.error("Hyperlink with ID {} not found for Learning tag with ID {}", hyperlinkId, learningTagId);
+                                return new ResourceNotFoundException(String.format("Hyperlink with ID %s not found for Learning tag with ID %s", hyperlinkId, learningTagId));
+                            });
+                    learningTagHyperlinkRepository.delete(hyperlink);
+                    successful.add(hyperlinkId);
+                } catch (Exception e) {
+                    failed.add(hyperlinkId);
+                }
+            });
+        }
+
+        return new BulkUpdateResponse<>(successful, failed);
     }
 
     public void assignCoursesToTag(LearningTagCourseBulkRequest request) {
