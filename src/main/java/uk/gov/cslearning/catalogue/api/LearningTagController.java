@@ -88,7 +88,7 @@ public class LearningTagController {
 
     @PostMapping("/courses")
     @ResponseStatus(HttpStatus.CREATED)
-    public void assignCoursesToTag(@Valid @RequestBody LearningTagCourseBulkRequest request) {
-        learningTagService.assignCoursesToTag(request);
+    public BulkUpdateResponse<LearningTagCourseUpdateResponse> assignCoursesToTag(@Valid @RequestBody LearningTagCourseBulkRequest request) {
+        return learningTagService.assignCoursesToTag(request);
     }
 }

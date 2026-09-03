@@ -45,6 +45,12 @@ public class LearningTag {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     Set<LearningTag> children = new HashSet<>();
 
+    @OneToMany(mappedBy = "learningTag", fetch = FetchType.LAZY)
+    private Set<CourseLearningTagEntity> courses = new HashSet<>();
+
+    @OneToMany(mappedBy = "learningTag", fetch = FetchType.LAZY)
+    private Set<LearningTagHyperlink> hyperlinks = new HashSet<>();
+
     @Column(nullable = false)
     private LocalDateTime createdTimestamp;
 
