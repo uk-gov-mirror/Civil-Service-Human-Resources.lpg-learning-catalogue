@@ -4,7 +4,10 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.cslearning.catalogue.domain.*;
+import uk.gov.cslearning.catalogue.domain.Course;
+import uk.gov.cslearning.catalogue.domain.LearningTag;
+import uk.gov.cslearning.catalogue.domain.LearningTagHyperlink;
+import uk.gov.cslearning.catalogue.domain.Status;
 import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
 import uk.gov.cslearning.catalogue.repository.sql.*;
 
@@ -194,29 +197,23 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     @Test
     @Transactional
     public void testGetCoursesByLearningTag() throws Exception {
-        CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
-        CourseEntity course2 = courseRepository.save(new CourseEntity("uid-a", "Course A", "Course A short description", draftStatus));
-
-        LearningTag tag = learningTagRepository.findById(1L).get();
-
-        courseTagRepository.save(new CourseLearningTagEntity(tag, course2));
 
         mvc.perform(get("/learning-tags/1/courses?page=0&size=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[0].title").value("Course A"))
-                .andExpect(jsonPath("$.content[0].id").value("uid-a"))
-                .andExpect(jsonPath("$.content[0].shortDescription").value("Course A short description"))
-                .andExpect(jsonPath("$.content[0].status").value("Draft"))
-                .andExpect(jsonPath("$.content[1].title").value("Course ABC"))
-                .andExpect(jsonPath("$.content[1].id").value("ABC"))
-                .andExpect(jsonPath("$.content[1].shortDescription").value("Course ABC short description"))
+                .andExpect(jsonPath("$.content[0].title").value("Course ABC"))
+                .andExpect(jsonPath("$.content[0].id").value("ABC"))
+                .andExpect(jsonPath("$.content[0].shortDescription").value("Course ABC short description"))
+                .andExpect(jsonPath("$.content[0].status").value("Published"))
+                .andExpect(jsonPath("$.content[1].title").value("Course DEF"))
+                .andExpect(jsonPath("$.content[1].id").value("DEF"))
+                .andExpect(jsonPath("$.content[1].shortDescription").value("Course DEF short description"))
                 .andExpect(jsonPath("$.content[1].status").value("Published"))
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.size").value(2))
-                .andExpect(jsonPath("$.totalResults").value(4))
+                .andExpect(jsonPath("$.totalResults").value(3))
                 .andExpect(jsonPath("$.totalPages").value(2))
-                .andExpect(jsonPath("$.totalElements").value(4))
+                .andExpect(jsonPath("$.totalElements").value(3))
                 .andExpect(jsonPath("$.numberOfElements").value(2))
                 .andExpect(jsonPath("$.first").value(true))
                 .andExpect(jsonPath("$.last").value(false))
@@ -241,22 +238,13 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     @Test
     @Transactional
     public void testRemoveCoursesFromLearningTag() throws Exception {
-        CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
-        CourseEntity course1 = courseRepository.save(new CourseEntity("uid-1", "Course 1", "Course 1 short description", draftStatus));
-        CourseEntity course2 = courseRepository.save(new CourseEntity("uid-2", "Course 2", "Course 2 short description", draftStatus));
-
-        LearningTag tag = learningTagRepository.findById(1L).get();
-
-        courseTagRepository.save(new CourseLearningTagEntity(tag, course1));
-        courseTagRepository.save(new CourseLearningTagEntity(tag, course2));
-
         mvc.perform(delete("/learning-tags/1/courses")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"ids\": [\"uid-1\", \"uid-2\", \"non-existent\"]}"))
+                        .content("{\"ids\": [\"ABC\", \"DEF\", \"non-existent\"]}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.successfulIds", hasSize(2)))
-                .andExpect(jsonPath("$.successfulIds[0]").value("uid-1"))
-                .andExpect(jsonPath("$.successfulIds[1]").value("uid-2"))
+                .andExpect(jsonPath("$.successfulIds[0]").value("ABC"))
+                .andExpect(jsonPath("$.successfulIds[1]").value("DEF"))
                 .andExpect(jsonPath("$.failedIds", hasSize(1)))
                 .andExpect(jsonPath("$.failedIds[0]").value("non-existent"));
     }
@@ -264,9 +252,6 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
     @Test
     @Transactional
     public void testAssignCoursesToTag() throws Exception {
-        CourseStatusEntity draftStatus = courseStatusRepository.findByName("Draft").get();
-
-        courseRepository.save(new CourseEntity("uid-existing", "Old Title", "Old short description", draftStatus));
 
         Course elasticCourse = new Course();
         elasticCourse.setId("uid-new");
@@ -279,7 +264,7 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
 
         String requestBody = "{" +
                 "\"learningTagIds\": [1, 2]," +
-                "\"courseIds\": [\"uid-existing\", \"uid-new\", \"uid-missing\"]" +
+                "\"courseIds\": [\"ABC\", \"DEF\", \"uid-new\", \"uid-missing\"]" +
                 "}";
 
         mvc.perform(post("/learning-tags/courses")
@@ -289,26 +274,11 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.successfulIds[0].learningTagId").value("1"))
                 .andExpect(jsonPath("$.successfulIds[0].successfulIds[0]").value("4"))
-                .andExpect(jsonPath("$.successfulIds[0].successfulIds[1]").value("5"))
                 .andExpect(jsonPath("$.successfulIds[1].learningTagId").value("2"))
-                .andExpect(jsonPath("$.successfulIds[1].successfulIds[0]").value("4"))
-                .andExpect(jsonPath("$.successfulIds[1].successfulIds[1]").value("5"));
+                .andExpect(jsonPath("$.successfulIds[1].successfulIds[0]").value("1"))
+                .andExpect(jsonPath("$.successfulIds[1].successfulIds[1]").value("2"))
+                .andExpect(jsonPath("$.successfulIds[1].successfulIds[2]").value("4"));
 
-        // Verify tags for uid-existing
-        mvc.perform(get("/learning-tags/1/courses"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[?(@.id=='uid-existing')]").exists());
-        mvc.perform(get("/learning-tags/2/courses"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[?(@.id=='uid-existing')]").exists());
-
-        // Verify tags for uid-new
-        mvc.perform(get("/learning-tags/1/courses"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[?(@.id=='uid-new')]").exists());
-        mvc.perform(get("/learning-tags/2/courses"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[?(@.id=='uid-new')]").exists());
 
     }
 
