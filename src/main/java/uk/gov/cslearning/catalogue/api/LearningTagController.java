@@ -51,6 +51,13 @@ public class LearningTagController {
         return learningTagService.createLearningTag(learningTag);
     }
 
+    @PostMapping("/{learningTagId}/hyperlink")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CREATED)
+    public LearningTagHyperlinkDto createHyperlink(@PathVariable Long learningTagId, @Valid @RequestBody LearningTagHyperlinkDto dto) {
+        return learningTagService.createLearningTagHyperlink(learningTagId, dto);
+    }
+
     @PutMapping("/{learningTagId}")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)

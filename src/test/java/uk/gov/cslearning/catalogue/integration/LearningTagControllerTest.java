@@ -381,4 +381,62 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                 .andExpect(jsonPath("$.failedIds", hasSize(1)))
                 .andExpect(jsonPath("$.failedIds[0]").value(99999));
     }
+
+    @Test
+    @Transactional
+    public void testCreateLearningTagHyperlink() throws Exception {
+        mvc.perform(post("/learning-tags/1/hyperlink")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\": \"Link title\", \"href\": \"https://bbc.co.uk\", \"description\": \"Lorem ipsum...\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.title").value("Link title"))
+                .andExpect(jsonPath("$.href").value("https://bbc.co.uk"))
+                .andExpect(jsonPath("$.description").value("Lorem ipsum..."));
+    }
+
+    @Test
+    @Transactional
+    public void testCreateLearningTagHyperlinkWithoutDescription() throws Exception {
+        mvc.perform(post("/learning-tags/1/hyperlink")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\": \"Link title\", \"href\": \"https://bbc.co.uk\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.title").value("Link title"))
+                .andExpect(jsonPath("$.href").value("https://bbc.co.uk"))
+                .andExpect(jsonPath("$.description").isEmpty());
+    }
+
+    @Test
+    public void testCreateLearningTagHyperlinkWithHttpUrl() throws Exception {
+        mvc.perform(post("/learning-tags/1/hyperlink")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\": \"Link title\", \"href\": \"http://bbc.co.uk\", \"description\": \"Lorem ipsum...\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testCreateLearningTagHyperlinkWithInvalidUrl() throws Exception {
+        mvc.perform(post("/learning-tags/1/hyperlink")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\": \"Link title\", \"href\": \"not-a-url\", \"description\": \"Lorem ipsum...\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testCreateLearningTagHyperlinkWithMissingTitle() throws Exception {
+        mvc.perform(post("/learning-tags/1/hyperlink")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"href\": \"https://bbc.co.uk\", \"description\": \"Lorem ipsum...\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testCreateLearningTagHyperlinkWhenTagNotFound() throws Exception {
+        mvc.perform(post("/learning-tags/99999/hyperlink")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\": \"Link title\", \"href\": \"https://bbc.co.uk\", \"description\": \"Lorem ipsum...\"}"))
+                .andExpect(status().isNotFound());
+    }
 }

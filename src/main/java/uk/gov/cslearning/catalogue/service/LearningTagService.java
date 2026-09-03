@@ -56,6 +56,13 @@ public class LearningTagService {
                 pageable);
     }
 
+    public LearningTagHyperlinkDto createLearningTagHyperlink(Long learningTagId, @Valid LearningTagHyperlinkDto dto) {
+        LearningTag learningTag = getLearningTagById(learningTagId);
+        LearningTagHyperlink hyperlink = learningTagFactory.createHyperlink(dto, learningTag);
+        learningTagHyperlinkRepository.save(hyperlink);
+        return learningTagFactory.createHyperlinkDto(hyperlink);
+    }
+
     public SimplePage<LearningTagDto> getLearningTags(Pageable pageable) {
         Page<LearningTag> page = learningTagRepository.findAll(pageable);
         return new SimplePage<>(page.getContent().stream().map(learningTagFactory::createDto).collect(Collectors.toList()),

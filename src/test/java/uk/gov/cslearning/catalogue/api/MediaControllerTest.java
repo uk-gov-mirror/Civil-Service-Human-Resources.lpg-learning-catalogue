@@ -13,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cslearning.catalogue.config.FileUploadMap;
+import uk.gov.cslearning.catalogue.domain.ErrorDtoFactory;
 import uk.gov.cslearning.catalogue.domain.Media;
 import uk.gov.cslearning.catalogue.dto.upload.FileUpload;
 import uk.gov.cslearning.catalogue.service.upload.MediaManagementService;
@@ -42,6 +43,9 @@ public class MediaControllerTest {
 
     @MockBean
     private MediaManagementService mediaManagementService;
+
+    @MockBean
+    private ErrorDtoFactory errorDtoFactory;
 
     @Test
     public void shouldUploadFileOnPostRequest() throws Exception {

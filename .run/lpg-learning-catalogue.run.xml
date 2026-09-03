@@ -9,22 +9,31 @@
           <entry key="AZURE_STORAGE_SCORM_CONTAINER" value="rustici" />
           <entry key="CLIENT_ID" value="9fbd4ae2-2db3-44c7-9544-88e80255b56e" />
           <entry key="CLIENT_SECRET" value="test" />
-          <entry key="ELASTICSEARCH_USERNAME" value="elastic" />
+          <entry key="DATABASE_HOST" value="jdbc:mysql://localhost:3306" />
+          <entry key="DATABASE_NAME" value="learning_catalogue" />
+          <entry key="DATABASE_USESSL" value="false" />
+          <entry key="DATASOURCE_PASSWORD" value="my-secret-pw" />
+          <entry key="DATASOURCE_USERNAME" value="root" />
           <entry key="ELASTICSEARCH_PASSWORD" value="changeme" />
+          <entry key="ELASTICSEARCH_READ_TIMEOUT" value="10000" />
+          <entry key="ELASTICSEARCH_USERNAME" value="elastic" />
+          <entry key="ELEARNING_MANIFESTS" value="imsmanifest.xml,tincan.xml" />
           <entry key="ES_HOST" value="localhost" />
           <entry key="ES_PORT" value="9200" />
           <entry key="ES_PROTOCOL" value="http" />
-          <entry key="JAVA_HOME" value="C:\Program Files\Java\java-1.8.0" />
-          <entry key="jwt_key" value="key" />
+          <entry key="JWT_KEY" value="key" />
           <entry key="LEARNER_RECORD_URL" value="http://localhost:9000" />
           <entry key="OAUTH_CHECK_TOKEN_ENDPOINT" value="/oauth2/introspect" />
           <entry key="OAUTH_SERVICE_URL" value="http://localhost:9005" />
           <entry key="OAUTH_TOKEN_ENDPOINT" value="/oauth2/token" />
           <entry key="REGISTRY_SERVICE_URL" value="http://localhost:9002" />
+          <entry key="RETENTION_TIME_IN_DAYS" value="90" />
+          <entry key="ROOT_LOGGING_LEVEL" value="debug" />
           <entry key="RUSTICI_PASSWORD" value="password" />
           <entry key="RUSTICI_TENANT" value="default" />
           <entry key="RUSTICI_URL" value="http://csl.local/rustici" />
           <entry key="RUSTICI_USERNAME" value="apiuser" />
+          <entry key="TIME_ZONE_ID" value="UTC" />
         </map>
       </option>
       <option name="executionName" />

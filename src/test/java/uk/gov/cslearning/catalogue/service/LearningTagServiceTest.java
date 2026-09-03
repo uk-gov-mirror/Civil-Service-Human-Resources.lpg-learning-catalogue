@@ -104,6 +104,44 @@ public class LearningTagServiceTest {
     }
 
     @Test
+    public void testCreateLearningTagHyperlink() {
+        Long tagId = 1L;
+        LearningTag tag = new LearningTag();
+        tag.setId(tagId);
+
+        LearningTagHyperlinkDto inputDto = new LearningTagHyperlinkDto(null, "BBC", "BBC Desc", "https://bbc.co.uk");
+        LearningTagHyperlink createdEntity = new LearningTagHyperlink(100L, tag, "https://bbc.co.uk", "BBC", "BBC Desc", null, null);
+        LearningTagHyperlinkDto expectedResultDto = new LearningTagHyperlinkDto(100L, "BBC", "BBC Desc", "https://bbc.co.uk");
+
+        when(learningTagRepository.findById(tagId)).thenReturn(Optional.of(tag));
+        when(learningTagFactory.createHyperlink(inputDto, tag)).thenReturn(createdEntity);
+        when(learningTagHyperlinkRepository.save(createdEntity)).thenReturn(createdEntity);
+        when(learningTagFactory.createHyperlinkDto(createdEntity)).thenReturn(expectedResultDto);
+
+        LearningTagHyperlinkDto result = learningTagService.createLearningTagHyperlink(tagId, inputDto);
+
+        assertEquals(Long.valueOf(100L), result.getId());
+        assertEquals("BBC", result.getTitle());
+        assertEquals("BBC Desc", result.getDescription());
+        assertEquals("https://bbc.co.uk", result.getHref());
+
+        verify(learningTagRepository).findById(tagId);
+        verify(learningTagFactory).createHyperlink(inputDto, tag);
+        verify(learningTagHyperlinkRepository).save(createdEntity);
+        verify(learningTagFactory).createHyperlinkDto(createdEntity);
+    }
+
+    @Test(expected = ResourceNotFoundException.class)
+    public void testCreateLearningTagHyperlinkWhenTagNotFound() {
+        Long tagId = 999L;
+        LearningTagHyperlinkDto inputDto = new LearningTagHyperlinkDto(null, "BBC", "BBC Desc", "https://bbc.co.uk");
+
+        when(learningTagRepository.findById(tagId)).thenReturn(Optional.empty());
+
+        learningTagService.createLearningTagHyperlink(tagId, inputDto);
+    }
+
+    @Test
     public void testRemoveHyperlinksFromLearningTag() {
         Long tagId = 1L;
         LearningTag tag = new LearningTag();
