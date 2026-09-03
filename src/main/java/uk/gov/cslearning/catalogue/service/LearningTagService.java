@@ -195,22 +195,17 @@ public class LearningTagService {
                         return courseRepository.save(new CourseEntity(elasticCourse.getId(), elasticCourse.getTitle(), elasticCourse.getShortDescription(), status));
                     });
 
-            if (course != null) {
-                learningTags.forEach(learningTag -> {
-                    if (courseTagRepository.findByLearningTagIdAndCourseId(learningTag.getId(), course.getId()).isPresent()) {
-                        log.info("CourseId {} is already assigned to learningTagId {}. Skipping", course.getId(), learningTag.getId());
-                    } else {
-                        courseTagRepository.save(new CourseLearningTagEntity(learningTag, course));
-                        learningTagsToCoursesMap.compute(learningTag.getId(), (aLong, courseIds) -> {
-                            if (courseIds == null) {
-                                courseIds = new ArrayList<>();
-                            }
-                            courseIds.add(course.getId());
-                            return courseIds;
-                        });
-                    }
-                });
+            if (course == null) {
+                return;
             }
+            learningTags.forEach(learningTag -> {
+                if (courseTagRepository.findByLearningTagIdAndCourseId(learningTag.getId(), course.getId()).isPresent()) {
+                    log.info("CourseId {} is already assigned to learningTagId {}. Skipping", course.getId(), learningTag.getId());
+                    return;
+                }
+                courseTagRepository.save(new CourseLearningTagEntity(learningTag, course));
+                learningTagsToCoursesMap.computeIfAbsent(learningTag.getId(), k -> new ArrayList<>()).add(course.getId());
+            });
         });
         Collection<LearningTagCourseUpdateResponse> successfulUpdates = learningTagsToCoursesMap
                 .entrySet().stream().map(longCollectionEntry -> new LearningTagCourseUpdateResponse(longCollectionEntry.getValue(), Collections.emptyList(), longCollectionEntry.getKey())).collect(Collectors.toList());
