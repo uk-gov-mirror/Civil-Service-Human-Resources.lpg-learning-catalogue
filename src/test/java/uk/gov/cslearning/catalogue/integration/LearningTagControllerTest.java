@@ -286,7 +286,13 @@ public class LearningTagControllerTest extends MySQLIntegrationTestBase {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody)
                         .with(csrf()))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.successfulIds[0].learningTagId").value("1"))
+                .andExpect(jsonPath("$.successfulIds[0].successfulIds[0]").value("4"))
+                .andExpect(jsonPath("$.successfulIds[0].successfulIds[1]").value("5"))
+                .andExpect(jsonPath("$.successfulIds[1].learningTagId").value("2"))
+                .andExpect(jsonPath("$.successfulIds[1].successfulIds[0]").value("4"))
+                .andExpect(jsonPath("$.successfulIds[1].successfulIds[1]").value("5"));
 
         // Verify tags for uid-existing
         mvc.perform(get("/learning-tags/1/courses"))

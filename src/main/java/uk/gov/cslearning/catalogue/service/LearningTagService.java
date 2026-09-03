@@ -9,16 +9,10 @@ import uk.gov.cslearning.catalogue.domain.*;
 import uk.gov.cslearning.catalogue.dto.BulkUpdateDto;
 import uk.gov.cslearning.catalogue.exception.ResourceNotFoundException;
 import uk.gov.cslearning.catalogue.repository.elastic.CourseRepository;
-import uk.gov.cslearning.catalogue.repository.sql.ICourseRepository;
-import uk.gov.cslearning.catalogue.repository.sql.ICourseStatusRepository;
-import uk.gov.cslearning.catalogue.repository.sql.ICourseTagRepository;
-import uk.gov.cslearning.catalogue.repository.sql.ILearningTagHyperlinkRepository;
-import uk.gov.cslearning.catalogue.repository.sql.ILearningTagRepository;
+import uk.gov.cslearning.catalogue.repository.sql.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -179,7 +173,8 @@ public class LearningTagService {
         return new BulkUpdateResponse<>(successful, failed);
     }
 
-    public void assignCoursesToTag(LearningTagCourseBulkRequest request) {
+    public BulkUpdateResponse<LearningTagCourseUpdateResponse> assignCoursesToTag(LearningTagCourseBulkRequest request) {
+        Map<Long, Collection<Long>> learningTagsToCoursesMap = new HashMap<>();
         List<LearningTag> learningTags = learningTagRepository.findAllById(request.getLearningTagIds());
 
         request.getCourseIds().forEach(courseUid -> {
@@ -203,12 +198,22 @@ public class LearningTagService {
             if (course != null) {
                 learningTags.forEach(learningTag -> {
                     if (courseTagRepository.findByLearningTagIdAndCourseId(learningTag.getId(), course.getId()).isPresent()) {
-                        log.info("CourseId {} is already assigned to learningTagId {}. Skipping", course.getId(),  learningTag.getId());
+                        log.info("CourseId {} is already assigned to learningTagId {}. Skipping", course.getId(), learningTag.getId());
                     } else {
                         courseTagRepository.save(new CourseLearningTagEntity(learningTag, course));
+                        learningTagsToCoursesMap.compute(learningTag.getId(), (aLong, courseIds) -> {
+                            if (courseIds == null) {
+                                courseIds = new ArrayList<>();
+                            }
+                            courseIds.add(course.getId());
+                            return courseIds;
+                        });
                     }
                 });
             }
         });
+        Collection<LearningTagCourseUpdateResponse> successfulUpdates = learningTagsToCoursesMap
+                .entrySet().stream().map(longCollectionEntry -> new LearningTagCourseUpdateResponse(longCollectionEntry.getValue(), Collections.emptyList(), longCollectionEntry.getKey())).collect(Collectors.toList());
+        return new BulkUpdateResponse<>(successfulUpdates, Collections.emptyList());
     }
 }
